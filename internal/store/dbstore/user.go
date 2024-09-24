@@ -8,32 +8,32 @@ import (
 )
 
 type UserStore struct {
-	db           *gorm.DB
-	passwordhash hash.PasswordHash
+	db             *gorm.DB
+	passwordHasher hash.PasswordHasher
 }
 
 type NewUserStoreParams struct {
-	DB           *gorm.DB
-	PasswordHash hash.PasswordHash
+	DB             *gorm.DB
+	PasswordHasher hash.PasswordHasher
 }
 
 func NewUserStore(params NewUserStoreParams) *UserStore {
 	return &UserStore{
-		db:           params.DB,
-		passwordhash: params.PasswordHash,
+		db:             params.DB,
+		passwordHasher: params.PasswordHasher,
 	}
 }
 
 func (s *UserStore) CreateUser(email string, password string) error {
 
-	hashedPassword, err := s.passwordhash.GenerateFromPassword(password)
+	hashedPassword, err := s.passwordHasher.GenerateFromPassword(password)
 	if err != nil {
 		return err
 	}
 
 	return s.db.Create(&store.User{
-		Email:    email,
-		Password: hashedPassword,
+		Email:        email,
+		PasswordHash: hashedPassword,
 	}).Error
 }
 

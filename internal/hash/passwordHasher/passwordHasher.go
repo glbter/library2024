@@ -1,4 +1,4 @@
-package passwordhash
+package passwordHasher
 
 import (
 	"crypto/rand"
@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-type PasswordHash struct {
+type PasswordHasher struct {
 	memory      uint32
 	iterations  uint32
 	parallelism uint8
@@ -19,8 +19,8 @@ type PasswordHash struct {
 	keyLength   uint32
 }
 
-func NewHPasswordHash() *PasswordHash {
-	return &PasswordHash{
+func NewHPasswordHasher() *PasswordHasher {
+	return &PasswordHasher{
 		memory:      64 * 1024,
 		iterations:  3,
 		parallelism: 2,
@@ -34,7 +34,7 @@ var (
 	ErrIncompatibleVersion = errors.New("incompatible version of argon2")
 )
 
-func (h *PasswordHash) GenerateFromPassword(password string) (encodedHash string, err error) {
+func (h *PasswordHasher) GenerateFromPassword(password string) (encodedHash string, err error) {
 	salt, err := generateRandomBytes(h.saltLength)
 	if err != nil {
 		return "", err
@@ -70,7 +70,7 @@ type params struct {
 	keyLength   uint32
 }
 
-func (h *PasswordHash) ComparePasswordAndHash(password, encodedHash string) (match bool, err error) {
+func (h *PasswordHasher) ComparePasswordAndHash(password, encodedHash string) (match bool, err error) {
 	// Extract the parameters, salt and derived key from the encoded password
 	// hash.
 	p, salt, hash, err := h.decodeHash(encodedHash)
@@ -90,7 +90,7 @@ func (h *PasswordHash) ComparePasswordAndHash(password, encodedHash string) (mat
 	return false, nil
 }
 
-func (h *PasswordHash) decodeHash(encodedHash string) (p *params, salt, hash []byte, err error) {
+func (h *PasswordHasher) decodeHash(encodedHash string) (p *params, salt, hash []byte, err error) {
 	vals := strings.Split(encodedHash, "$")
 	if len(vals) != 6 {
 		return nil, nil, nil, ErrInvalidHash

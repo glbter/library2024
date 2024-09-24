@@ -4,12 +4,11 @@ import (
 	"library/internal/store"
 	"os"
 
-	"gorm.io/driver/sqlite" // Sqlite driver based on CGO
-	// "github.com/glebarez/sqlite" // Pure go SQLite driver, checkout https://github.com/glebarez/sqlite for details
+	"gorm.io/driver/postgres" // Sqlite driver based on CGO
 	"gorm.io/gorm"
 )
 
-func open(dbName string) (*gorm.DB, error) {
+func open(dsn string) (*gorm.DB, error) {
 
 	// make the temp directory if it doesn't exist
 	err := os.MkdirAll("/tmp", 0755)
@@ -17,16 +16,20 @@ func open(dbName string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	return gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	return gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true, // disables implicit prepared statement usage
+	}), &gorm.Config{})
+
 }
 
-func MustOpen(dbName string) *gorm.DB {
-
-	if dbName == "" {
-		dbName = "goth.db"
+func MustOpen(dsn string) *gorm.DB {
+	if dsn == "" {
+		//TODO: [Hlib] insert local credentials for development purposes
+		dsn = "user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
 	}
 
-	db, err := open(dbName)
+	db, err := open(dsn)
 	if err != nil {
 		panic(err)
 	}

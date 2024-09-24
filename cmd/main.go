@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"library/internal/config"
 	"library/internal/handlers"
-	"library/internal/hash/passwordhash"
+	"library/internal/hash/passwordHasher"
 	database "library/internal/store/db"
 	"library/internal/store/dbstore"
 	"log/slog"
@@ -39,13 +39,13 @@ func main() {
 
 	cfg := config.MustLoadConfig()
 
-	db := database.MustOpen(cfg.DatabaseName)
-	pwHash := passwordhash.NewHPasswordHash()
+	db := database.MustOpen(cfg.DSN)
+	pwHasher := passwordHasher.NewHPasswordHasher()
 
 	userStore := dbstore.NewUserStore(
 		dbstore.NewUserStoreParams{
-			DB:           db,
-			PasswordHash: pwHash,
+			DB:             db,
+			PasswordHasher: pwHasher,
 		},
 	)
 
@@ -85,7 +85,7 @@ func main() {
 		r.Post("/login", handlers.NewPostLoginHandler(handlers.PostLoginHandlerParams{
 			UserStore:         userStore,
 			SessionStore:      sessionStore,
-			PasswordHash:      pwHash,
+			PasswordHash:      pwHasher,
 			SessionCookieName: cfg.SessionCookieName,
 		}).ServeHTTP)
 

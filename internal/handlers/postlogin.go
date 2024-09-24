@@ -13,14 +13,14 @@ import (
 type PostLoginHandler struct {
 	userStore         store.UserStore
 	sessionStore      store.SessionStore
-	passwordhash      hash.PasswordHash
+	passwordhash      hash.PasswordHasher
 	sessionCookieName string
 }
 
 type PostLoginHandlerParams struct {
 	UserStore         store.UserStore
 	SessionStore      store.SessionStore
-	PasswordHash      hash.PasswordHash
+	PasswordHash      hash.PasswordHasher
 	SessionCookieName string
 }
 
@@ -47,7 +47,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	passwordIsValid, err := h.passwordhash.ComparePasswordAndHash(password, user.Password)
+	passwordIsValid, err := h.passwordhash.ComparePasswordAndHash(password, user.PasswordHash)
 
 	if err != nil || !passwordIsValid {
 		w.WriteHeader(http.StatusUnauthorized)

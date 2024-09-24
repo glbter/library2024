@@ -17,7 +17,7 @@ import (
 
 func TestLogin(t *testing.T) {
 
-	user := &store.User{ID: 1, Email: "test@example.com", Password: "password"}
+	user := &store.User{ID: 1, Email: "test@example.com", PasswordHash: "password"}
 
 	testCases := []struct {
 		name                         string
@@ -33,7 +33,7 @@ func TestLogin(t *testing.T) {
 		{
 			name:                         "success",
 			email:                        user.Email,
-			password:                     user.Password,
+			password:                     user.PasswordHash,
 			comparePasswordAndHashResult: true,
 			getUserResult:                user,
 			createSessionResult:          &store.Session{UserID: 1, SessionID: "sessionId"},
@@ -47,7 +47,7 @@ func TestLogin(t *testing.T) {
 		{
 			name:               "fail - user not found",
 			email:              user.Email,
-			password:           user.Password,
+			password:           user.PasswordHash,
 			getUserResult:      nil,
 			getUserError:       gorm.ErrRecordNotFound,
 			expectedStatusCode: http.StatusUnauthorized,
@@ -55,7 +55,7 @@ func TestLogin(t *testing.T) {
 		{
 			name:                         "fail - invalid password",
 			email:                        user.Email,
-			password:                     user.Password,
+			password:                     user.PasswordHash,
 			getUserResult:                user,
 			comparePasswordAndHashResult: false,
 			expectedStatusCode:           http.StatusUnauthorized,
@@ -72,7 +72,7 @@ func TestLogin(t *testing.T) {
 			userStore.On("GetUser", tc.email).Return(tc.getUserResult, tc.getUserError)
 
 			if tc.getUserResult != nil {
-				passwordHash.On("ComparePasswordAndHash", tc.password, tc.getUserResult.Password).Return(tc.comparePasswordAndHashResult, nil)
+				passwordHash.On("ComparePasswordAndHash", tc.password, tc.getUserResult.PasswordHash).Return(tc.comparePasswordAndHashResult, nil)
 			}
 
 			if tc.getUserResult != nil && tc.comparePasswordAndHashResult {
