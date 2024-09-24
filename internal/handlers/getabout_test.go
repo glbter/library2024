@@ -3,7 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
-	"goth/internal/middleware"
+	"library/internal/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"

@@ -2,7 +2,7 @@ package dbstore
 
 import (
 	"fmt"
-	"goth/internal/store"
+	"library/internal/store"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

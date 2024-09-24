@@ -1,8 +1,8 @@
 package dbstore
 
 import (
-	"goth/internal/hash"
-	"goth/internal/store"
+	"library/internal/hash"
+	"library/internal/store"
 
 	"gorm.io/gorm"
 )

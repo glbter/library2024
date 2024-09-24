@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"errors"
-	"goth/internal/config"
-	"goth/internal/handlers"
-	"goth/internal/hash/passwordHash"
-	database "goth/internal/store/db"
-	"goth/internal/store/dbstore"
+	"github.com/go-chi/chi/v5"
+	"library/internal/config"
+	"library/internal/handlers"
+	"library/internal/hash/passwordhash"
+	database "library/internal/store/db"
+	"library/internal/store/dbstore"
 	"log/slog"
 	"net/http"
 	"os"
@@ -15,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	m "goth/internal/middleware"
+	m "library/internal/middleware"
 
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -39,7 +40,7 @@ func main() {
 	cfg := config.MustLoadConfig()
 
 	db := database.MustOpen(cfg.DatabaseName)
-	pwHash := passwordHash.NewHPasswordHash()
+	pwHash := passwordhash.NewHPasswordHash()
 
 	userStore := dbstore.NewUserStore(
 		dbstore.NewUserStoreParams{

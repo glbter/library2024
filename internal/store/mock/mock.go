@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"goth/internal/store"
+	"library/internal/store"
 
 	"github.com/stretchr/testify/mock"
 )

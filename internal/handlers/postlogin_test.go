@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/base64"
 
-	hashmock "goth/internal/hash/mock"
-	"goth/internal/store"
-	storemock "goth/internal/store/mock"
+	hashmock "library/internal/hash/mock"
+	"library/internal/store"
+	storemock "library/internal/store/mock"
 	"net/http"
 	"net/http/httptest"
 	"testing"

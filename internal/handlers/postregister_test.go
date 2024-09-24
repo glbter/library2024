@@ -3,7 +3,7 @@ package handlers
 import (
 	"bytes"
 
-	storemock "goth/internal/store/mock"
+	storemock "library/internal/store/mock"
 	"net/http"
 	"net/http/httptest"
 	"testing"

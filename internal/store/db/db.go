@@ -1,7 +1,7 @@
 package db
 
 import (
-	"goth/internal/store"
+	"library/internal/store"
 	"os"
 
 	"gorm.io/driver/sqlite" // Sqlite driver based on CGO

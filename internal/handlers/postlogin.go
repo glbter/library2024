@@ -3,9 +3,9 @@ package handlers
 import (
 	b64 "encoding/base64"
 	"fmt"
-	"goth/internal/hash"
-	"goth/internal/store"
-	"goth/internal/templates"
+	"library/internal/hash"
+	"library/internal/store"
+	"library/internal/templates"
 	"net/http"
 	"time"
 )

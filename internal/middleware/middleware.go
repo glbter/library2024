@@ -6,7 +6,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"goth/internal/store"
+	"library/internal/store"
 	"log"
 	"net/http"
 	"strings"

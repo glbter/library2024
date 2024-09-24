@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"goth/internal/middleware"
-	"goth/internal/store"
-	"goth/internal/templates"
+	"library/internal/middleware"
+	"library/internal/store"
+	"library/internal/templates"
 	"net/http"
 )
 
