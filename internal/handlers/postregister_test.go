@@ -58,7 +58,11 @@ func TestRegisterUserHandler(t *testing.T) {
 
 			assert.Equal(tc.expectedStatusCode, rr.Code, "handler returned wrong status code: got %v want %v", rr.Code, tc.expectedStatusCode)
 
-			assert.True(bytes.Contains(rr.Body.Bytes(), tc.expectedBody), "handler returned unexpected body: got %v want %v", rr.Body.String(), tc.expectedBody)
+			assert.True(
+				bytes.Contains(rr.Body.Bytes(), tc.expectedBody),
+				"handler returned unexpected body: got \"%s\" want \"%s\"",
+				rr.Body.String(), tc.expectedBody,
+			)
 
 			userStore.AssertExpectations(t)
 		})
