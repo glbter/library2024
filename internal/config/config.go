@@ -4,7 +4,7 @@ import "github.com/kelseyhightower/envconfig"
 
 type Config struct {
 	Port              string `envconfig:"PORT" default:":4000"`
-	DSN               string `envconfig:"DSN" default:"goth.db"`
+	DSN               string `envconfig:"DSN" default:"library.db"`
 	SessionCookieName string `envconfig:"SESSION_COOKIE_NAME" default:"session"`
 }
 

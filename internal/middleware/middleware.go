@@ -67,7 +67,7 @@ func TextHTMLMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// get the Nonce from the context, it is a struct called Nonces,
+// GetNonces gets the Nonce from the context, it is a struct called Nonces,
 // so we can get the nonce we need by the key, i.e. HtmxNonce
 func GetNonces(ctx context.Context) Nonces {
 	nonceSet := ctx.Value(NonceKey)
