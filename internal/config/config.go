@@ -4,11 +4,11 @@ import "github.com/kelseyhightower/envconfig"
 
 type Config struct {
 	Port              string `envconfig:"PORT" default:":4000"`
-	DSN               string `envconfig:"DSN" default:"library.db"`
+	DSN               string `envconfig:"DSN"`
 	SessionCookieName string `envconfig:"SESSION_COOKIE_NAME" default:"session"`
 }
 
-func loadConfig() (*Config, error) {
+func LoadConfig() (*Config, error) {
 	var cfg Config
 	err := envconfig.Process("", &cfg)
 	if err != nil {
@@ -18,7 +18,7 @@ func loadConfig() (*Config, error) {
 }
 
 func MustLoadConfig() *Config {
-	cfg, err := loadConfig()
+	cfg, err := LoadConfig()
 	if err != nil {
 		panic(err)
 	}

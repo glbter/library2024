@@ -6,9 +6,12 @@ import (
 	b64 "encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/google/uuid"
 	"library/internal/store"
+	"library/internal/store/model"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -101,11 +104,11 @@ func GetTwNonce(ctx context.Context) string {
 }
 
 type AuthMiddleware struct {
-	sessionStore      store.SessionStore
+	sessionStore      store.SessionRepo
 	sessionCookieName string
 }
 
-func NewAuthMiddleware(sessionStore store.SessionStore, sessionCookieName string) *AuthMiddleware {
+func NewAuthMiddleware(sessionStore store.SessionRepo, sessionCookieName string) *AuthMiddleware {
 	return &AuthMiddleware{
 		sessionStore:      sessionStore,
 		sessionCookieName: sessionCookieName,
@@ -114,7 +117,7 @@ func NewAuthMiddleware(sessionStore store.SessionStore, sessionCookieName string
 
 type UserContextKey string
 
-var UserKey UserContextKey = "user"
+const UserKey UserContextKey = "user"
 
 func (m *AuthMiddleware) AddUserToContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -141,13 +144,23 @@ func (m *AuthMiddleware) AddUserToContext(next http.Handler) http.Handler {
 			return
 		}
 
-		sessionID := splitValue[0]
-		userID := splitValue[1]
+		sessionID, err := uuid.Parse(splitValue[0])
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		userIDStr := splitValue[1]
 
 		fmt.Println("sessionID", sessionID)
-		fmt.Println("userID", userID)
+		fmt.Println("userID", userIDStr)
 
-		user, err := m.sessionStore.GetUserFromSession(sessionID, userID)
+		userID, err := strconv.ParseInt(userIDStr, 10, 64)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+		user, err := m.sessionStore.GetUserFromSession(r.Context(), sessionID, userID)
 
 		if err != nil {
 			next.ServeHTTP(w, r)
@@ -160,11 +173,11 @@ func (m *AuthMiddleware) AddUserToContext(next http.Handler) http.Handler {
 	})
 }
 
-func GetUser(ctx context.Context) *store.User {
+func GetUser(ctx context.Context) *model.User {
 	user := ctx.Value(UserKey)
 	if user == nil {
 		return nil
 	}
 
-	return user.(*store.User)
+	return user.(*model.User)
 }

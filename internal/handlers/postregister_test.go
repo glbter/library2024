@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 
 	storemock "library/internal/store/mock"
 	"net/http"
@@ -43,8 +44,9 @@ func TestRegisterUserHandler(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			assert := assert.New(t)
 			userStore := &storemock.UserStoreMock{}
+			ctx := context.Background()
 
-			userStore.On("CreateUser", tc.email, tc.password).Return(tc.createUserError)
+			userStore.On("CreateUser", ctx, tc.email, tc.password).Return(tc.createUserError)
 
 			handler := NewPostRegisterHandler(PostRegisterHandlerParams{
 				UserStore: userStore,

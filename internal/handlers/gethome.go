@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"library/internal/middleware"
-	"library/internal/store"
+	"library/internal/store/model"
 	"library/internal/templates"
 	"net/http"
 )
@@ -15,7 +15,7 @@ func NewHomeHandler() *HomeHandler {
 
 func (h *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	user, ok := r.Context().Value(middleware.UserKey).(*store.User)
+	user, ok := r.Context().Value(middleware.UserKey).(*model.User)
 
 	if !ok {
 		c := templates.GuestIndex()

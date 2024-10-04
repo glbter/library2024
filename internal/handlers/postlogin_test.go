@@ -2,10 +2,13 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
+	"fmt"
+	"github.com/google/uuid"
+	"library/internal/store/model"
 
 	hashmock "library/internal/hash/mock"
-	"library/internal/store"
 	storemock "library/internal/store/mock"
 	"net/http"
 	"net/http/httptest"
@@ -17,17 +20,18 @@ import (
 
 func TestLogin(t *testing.T) {
 
-	user := &store.User{ID: 1, Email: "test@example.com", PasswordHash: "password"}
+	user := &model.User{ID: 1, Email: "test@example.com", PasswordHash: "password"}
+	sessionID, _ := uuid.NewV7()
 
 	testCases := []struct {
 		name                         string
 		email                        string
 		password                     string
 		expectedStatusCode           int
-		getUserResult                *store.User
+		getUserResult                *model.User
 		comparePasswordAndHashResult bool
 		getUserError                 error
-		createSessionResult          *store.Session
+		createSessionResult          *model.Session
 		expectedCookie               *http.Cookie
 	}{
 		{
@@ -36,11 +40,11 @@ func TestLogin(t *testing.T) {
 			password:                     user.PasswordHash,
 			comparePasswordAndHashResult: true,
 			getUserResult:                user,
-			createSessionResult:          &store.Session{UserID: 1, SessionID: "sessionId"},
+			createSessionResult:          &model.Session{UserID: 1, ID: sessionID},
 			expectedStatusCode:           http.StatusOK,
 			expectedCookie: &http.Cookie{
 				Name:     "session",
-				Value:    base64.StdEncoding.EncodeToString([]byte("sessionId:1")),
+				Value:    base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:1", sessionID.String()))),
 				HttpOnly: true,
 			},
 		},
@@ -68,15 +72,16 @@ func TestLogin(t *testing.T) {
 			userStore := &storemock.UserStoreMock{}
 			sessionStore := &storemock.SessionStoreMock{}
 			passwordHash := &hashmock.PasswordHashMock{}
+			ctx := context.Background()
 
-			userStore.On("GetUser", tc.email).Return(tc.getUserResult, tc.getUserError)
+			userStore.On("GetUser", ctx, tc.email).Return(tc.getUserResult, tc.getUserError)
 
 			if tc.getUserResult != nil {
 				passwordHash.On("ComparePasswordAndHash", tc.password, tc.getUserResult.PasswordHash).Return(tc.comparePasswordAndHashResult, nil)
 			}
 
 			if tc.getUserResult != nil && tc.comparePasswordAndHashResult {
-				sessionStore.On("CreateSession", &store.Session{UserID: tc.getUserResult.ID}).Return(tc.createSessionResult, nil)
+				sessionStore.On("CreateSession", ctx, tc.getUserResult.ID).Return(tc.createSessionResult, nil)
 			}
 
 			handler := NewPostLoginHandler(PostLoginHandlerParams{

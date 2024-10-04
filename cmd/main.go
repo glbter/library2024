@@ -8,7 +8,7 @@ import (
 	"library/internal/handlers"
 	"library/internal/hash/passwordHasher"
 	database "library/internal/store/db"
-	"library/internal/store/dbstore"
+	"library/internal/store/repo"
 	"log/slog"
 	"net/http"
 	"os"
@@ -42,15 +42,15 @@ func main() {
 	db := database.MustOpen(cfg.DSN)
 	pwHasher := passwordHasher.NewHPasswordHasher()
 
-	userStore := dbstore.NewUserStore(
-		dbstore.NewUserStoreParams{
+	userStore := repo.NewUserStore(
+		repo.NewUserStoreParams{
 			DB:             db,
 			PasswordHasher: pwHasher,
 		},
 	)
 
-	sessionStore := dbstore.NewSessionStore(
-		dbstore.NewSessionStoreParams{
+	sessionStore := repo.NewSessionStore(
+		repo.NewSessionStoreParams{
 			DB: db,
 		},
 	)

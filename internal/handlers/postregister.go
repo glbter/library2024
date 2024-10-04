@@ -7,11 +7,11 @@ import (
 )
 
 type PostRegisterHandler struct {
-	userStore store.UserStore
+	userStore store.UserRepo
 }
 
 type PostRegisterHandlerParams struct {
-	UserStore store.UserStore
+	UserStore store.UserRepo
 }
 
 func NewPostRegisterHandler(params PostRegisterHandlerParams) *PostRegisterHandler {
@@ -24,13 +24,15 @@ func (h *PostRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	err := h.userStore.CreateUser(email, password)
+	err := h.userStore.CreateUser(r.Context(), email, password)
 
 	if err != nil {
-
 		w.WriteHeader(http.StatusBadRequest)
 		c := templates.RegisterError()
-		c.Render(r.Context(), w)
+		err = c.Render(r.Context(), w)
+		if err != nil {
+			http.Error(w, "error rendering template", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -41,5 +43,4 @@ func (h *PostRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "error rendering template", http.StatusInternalServerError)
 		return
 	}
-
 }

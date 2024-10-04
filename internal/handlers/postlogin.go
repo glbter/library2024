@@ -11,15 +11,15 @@ import (
 )
 
 type PostLoginHandler struct {
-	userStore         store.UserStore
-	sessionStore      store.SessionStore
+	userStore         store.UserRepo
+	sessionStore      store.SessionRepo
 	passwordhash      hash.PasswordHasher
 	sessionCookieName string
 }
 
 type PostLoginHandlerParams struct {
-	UserStore         store.UserStore
-	SessionStore      store.SessionStore
+	UserStore         store.UserRepo
+	SessionStore      store.SessionRepo
 	PasswordHash      hash.PasswordHasher
 	SessionCookieName string
 }
@@ -38,7 +38,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	user, err := h.userStore.GetUser(email)
+	user, err := h.userStore.GetUser(r.Context(), email)
 
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -56,9 +56,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := h.sessionStore.CreateSession(&store.Session{
-		UserID: user.ID,
-	})
+	session, err := h.sessionStore.CreateSession(r.Context(), user.ID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -66,7 +64,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := user.ID
-	sessionID := session.SessionID
+	sessionID := session.ID
 
 	cookieValue := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%d", sessionID, userID)))
 

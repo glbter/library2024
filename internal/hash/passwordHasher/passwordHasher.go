@@ -52,9 +52,9 @@ func (h *PasswordHasher) GenerateFromPassword(password string) (encodedHash stri
 	return encodedHash, nil
 }
 
-func generateRandomBytes(n uint32) ([]byte, error) {
+func generateRandomBytes(n uint32) (bytes []byte, err error) {
 	b := make([]byte, n)
-	_, err := rand.Read(b)
+	_, err = rand.Read(b)
 	if err != nil {
 		return nil, err
 	}

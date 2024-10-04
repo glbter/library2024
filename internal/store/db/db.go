@@ -1,15 +1,14 @@
 package db
 
 import (
-	"library/internal/store"
+	"library/internal/store/model"
 	"os"
 
-	"gorm.io/driver/postgres" // Sqlite driver based on CGO
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func open(dsn string) (*gorm.DB, error) {
-
 	// make the temp directory if it doesn't exist
 	err := os.MkdirAll("/tmp", 0755)
 	if err != nil {
@@ -17,24 +16,29 @@ func open(dsn string) (*gorm.DB, error) {
 	}
 
 	return gorm.Open(postgres.New(postgres.Config{
-		DSN:                  dsn,
-		PreferSimpleProtocol: true, // disables implicit prepared statement usage
+		DSN: dsn,
+		//PreferSimpleProtocol: true, // disables implicit prepared statement usage
 	}), &gorm.Config{})
-
 }
 
 func MustOpen(dsn string) *gorm.DB {
-	if dsn == "" {
-		//TODO: [Hlib] insert local credentials for development purposes
-		dsn = "user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
-	}
-
 	db, err := open(dsn)
 	if err != nil {
 		panic(err)
 	}
 
-	err = db.AutoMigrate(&store.User{}, &store.Session{})
+	err = db.AutoMigrate(
+		&model.User{},
+		&model.Session{},
+		&model.Book{},
+		&model.Genre{},
+		&model.BookToGenre{},
+		&model.Author{},
+		&model.BookToAuthor{},
+		&model.BookLendRequest{},
+		&model.BookLendTransaction{},
+		&model.BookReturnTransaction{},
+	)
 
 	if err != nil {
 		panic(err)

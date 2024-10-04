@@ -1,10 +1,11 @@
-package dbstore
+package repo
 
 import (
-	"library/internal/hash"
-	"library/internal/store"
-
+	"context"
 	"gorm.io/gorm"
+	"library/internal/hash"
+	"library/internal/store/model"
+	"library/internal/store/query"
 )
 
 type UserStore struct {
@@ -24,26 +25,20 @@ func NewUserStore(params NewUserStoreParams) *UserStore {
 	}
 }
 
-func (s *UserStore) CreateUser(email string, password string) error {
+func (s *UserStore) CreateUser(ctx context.Context, email string, password string) error {
 
 	hashedPassword, err := s.passwordHasher.GenerateFromPassword(password)
 	if err != nil {
 		return err
 	}
 
-	return s.db.Create(&store.User{
+	return query.Use(s.db).WithContext(ctx).User.Create(&model.User{
 		Email:        email,
 		PasswordHash: hashedPassword,
-	}).Error
+	})
 }
 
-func (s *UserStore) GetUser(email string) (*store.User, error) {
-
-	var user store.User
-	err := s.db.Where("email = ?", email).First(&user).Error
-
-	if err != nil {
-		return nil, err
-	}
-	return &user, err
+func (s *UserStore) GetUser(ctx context.Context, email string) (*model.User, error) {
+	u := query.User
+	return query.Use(s.db).WithContext(ctx).User.Where(u.Email.Eq(email)).First()
 }
