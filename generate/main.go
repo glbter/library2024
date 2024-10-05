@@ -27,6 +27,9 @@ func main() {
 			//return "pgtype.UUID"
 			return "uuid.UUID"
 		},
+		"date": func(columnType gorm.ColumnType) (dataType string) {
+			return "pgtype.Date"
+		},
 	})
 	g.ApplyBasic(g.GenerateAllTable()...)
 	g.ApplyBasic(

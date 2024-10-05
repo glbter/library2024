@@ -29,7 +29,7 @@ func newBookLendTransaction(db *gorm.DB, opts ...gen.DOOption) bookLendTransacti
 	_bookLendTransaction.ALL = field.NewAsterisk(tableName)
 	_bookLendTransaction.RequestID = field.NewField(tableName, "request_id")
 	_bookLendTransaction.CreatedAt = field.NewTime(tableName, "created_at")
-	_bookLendTransaction.DueDate = field.NewTime(tableName, "due_date")
+	_bookLendTransaction.DueDate = field.NewField(tableName, "due_date")
 
 	_bookLendTransaction.fillFieldMap()
 
@@ -42,7 +42,7 @@ type bookLendTransaction struct {
 	ALL       field.Asterisk
 	RequestID field.Field
 	CreatedAt field.Time
-	DueDate   field.Time
+	DueDate   field.Field
 
 	fieldMap map[string]field.Expr
 }
@@ -61,7 +61,7 @@ func (b *bookLendTransaction) updateTableName(table string) *bookLendTransaction
 	b.ALL = field.NewAsterisk(table)
 	b.RequestID = field.NewField(table, "request_id")
 	b.CreatedAt = field.NewTime(table, "created_at")
-	b.DueDate = field.NewTime(table, "due_date")
+	b.DueDate = field.NewField(table, "due_date")
 
 	b.fillFieldMap()
 

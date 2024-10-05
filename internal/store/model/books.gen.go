@@ -4,19 +4,17 @@
 
 package model
 
-import (
-	"time"
-)
+import "github.com/jackc/pgx/v5/pgtype"
 
 const TableNameBook = "books"
 
 // Book mapped from table <books>
 type Book struct {
-	ID          int64     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	Title       string    `gorm:"column:title;not null" json:"title"`
-	Description string    `gorm:"column:description;not null" json:"description"`
-	PublihsedOn time.Time `gorm:"column:publihsed_on;not null" json:"publihsed_on"`
-	Amount      int16     `gorm:"column:amount;not null" json:"amount"`
+	ID          int64       `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
+	Title       string      `gorm:"column:title;not null" json:"title"`
+	Description string      `gorm:"column:description;not null" json:"description"`
+	PublihsedOn pgtype.Date `gorm:"column:publihsed_on;not null" json:"publihsed_on"`
+	Amount      int16       `gorm:"column:amount;not null" json:"amount"`
 }
 
 // TableName Book's table name
