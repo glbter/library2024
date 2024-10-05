@@ -35,5 +35,4 @@ staticcheck:
 
 .PHONY: test
 test:
-	make templ-generate
 	go test -race -v -timeout 30s ./...
