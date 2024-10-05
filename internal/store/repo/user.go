@@ -2,43 +2,41 @@ package repo
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"library/internal/hash"
 	"library/internal/store/model"
 	"library/internal/store/query"
 )
 
-type UserStore struct {
-	db             *gorm.DB
+type UserRepo struct {
 	passwordHasher hash.PasswordHasher
 }
 
-type NewUserStoreParams struct {
-	DB             *gorm.DB
+type NewUserRepoParams struct {
 	PasswordHasher hash.PasswordHasher
 }
 
-func NewUserStore(params NewUserStoreParams) *UserStore {
-	return &UserStore{
-		db:             params.DB,
+func NewUserRepo(params NewUserRepoParams) *UserRepo {
+	return &UserRepo{
 		passwordHasher: params.PasswordHasher,
 	}
 }
 
-func (s *UserStore) CreateUser(ctx context.Context, email string, password string) error {
+func (r *UserRepo) CreateUser(ctx context.Context, email string, password string) error {
 
-	hashedPassword, err := s.passwordHasher.GenerateFromPassword(password)
+	hashedPassword, err := r.passwordHasher.GenerateFromPassword(password)
 	if err != nil {
 		return err
 	}
 
-	return query.Use(s.db).WithContext(ctx).User.Create(&model.User{
+	return query.User.WithContext(ctx).Create(&model.User{
 		Email:        email,
 		PasswordHash: hashedPassword,
 	})
 }
 
-func (s *UserStore) GetUser(ctx context.Context, email string) (*model.User, error) {
+func (r *UserRepo) GetUser(ctx context.Context, email string) (*model.User, error) {
 	u := query.User
-	return query.Use(s.db).WithContext(ctx).User.Where(u.Email.Eq(email)).First()
+	return u.WithContext(ctx).
+		Where(u.Email.Eq(email)).
+		Take()
 }

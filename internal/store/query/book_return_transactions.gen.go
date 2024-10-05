@@ -36,7 +36,7 @@ func newBookReturnTransaction(db *gorm.DB, opts ...gen.DOOption) bookReturnTrans
 }
 
 type bookReturnTransaction struct {
-	bookReturnTransactionDo
+	bookReturnTransactionDo bookReturnTransactionDo
 
 	ALL       field.Asterisk
 	RequestID field.Field
@@ -63,6 +63,18 @@ func (b *bookReturnTransaction) updateTableName(table string) *bookReturnTransac
 	b.fillFieldMap()
 
 	return b
+}
+
+func (b *bookReturnTransaction) WithContext(ctx context.Context) IBookReturnTransactionDo {
+	return b.bookReturnTransactionDo.WithContext(ctx)
+}
+
+func (b bookReturnTransaction) TableName() string { return b.bookReturnTransactionDo.TableName() }
+
+func (b bookReturnTransaction) Alias() string { return b.bookReturnTransactionDo.Alias() }
+
+func (b bookReturnTransaction) Columns(cols ...field.Expr) gen.Columns {
+	return b.bookReturnTransactionDo.Columns(cols...)
 }
 
 func (b *bookReturnTransaction) GetFieldByName(fieldName string) (field.OrderExpr, bool) {

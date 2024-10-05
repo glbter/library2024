@@ -6,27 +6,20 @@ import (
 	"library/internal/store/query"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
-type SessionRepo struct {
-	db *gorm.DB
+type SessionRepo struct{}
+
+type NewSessionStoreParams struct{}
+
+func NewSessionRepo() SessionRepo {
+	return SessionRepo{}
 }
 
-type NewSessionStoreParams struct {
-	DB *gorm.DB
-}
-
-func NewSessionStore(params NewSessionStoreParams) *SessionRepo {
-	return &SessionRepo{
-		db: params.DB,
-	}
-}
-
-func (s *SessionRepo) CreateSession(ctx context.Context, userId int64) (*model.Session, error) {
+func (r SessionRepo) CreateSession(ctx context.Context, userId int64) (*model.Session, error) {
 	session := model.Session{UserID: userId}
 
-	err := query.Use(s.db).WithContext(ctx).Session.Create(&session)
+	err := query.Session.WithContext(ctx).Create(&session)
 	if err != nil {
 		return nil, err
 	}
@@ -34,10 +27,11 @@ func (s *SessionRepo) CreateSession(ctx context.Context, userId int64) (*model.S
 	return &session, nil
 }
 
-func (s *SessionRepo) GetUserFromSession(ctx context.Context, sessionID uuid.UUID, userID int64) (*model.User, error) {
-	return query.Use(s.db).WithContext(ctx).
-		User.
-		Join(query.Session, query.User.ID.EqCol(query.Session.UserID)).
-		Where(query.Session.ID.Eq(sessionID), query.User.ID.Eq(userID)).
+func (r SessionRepo) GetUserFromSession(ctx context.Context, sessionID uuid.UUID, userID int64) (*model.User, error) {
+	u := query.User
+	s := query.Session
+	return u.WithContext(ctx).
+		Join(s, u.ID.EqCol(s.UserID)).
+		Where(s.ID.Eq(sessionID), u.ID.Eq(userID)).
 		First()
 }

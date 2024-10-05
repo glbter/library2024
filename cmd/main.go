@@ -34,26 +34,21 @@ func init() {
 }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	r := chi.NewRouter()
 
 	cfg := config.MustLoadConfig()
 
-	db := database.MustOpen(cfg.DSN)
+	database.MustOpen(cfg.DSN)
 	pwHasher := passwordHasher.NewHPasswordHasher()
 
-	userStore := repo.NewUserStore(
-		repo.NewUserStoreParams{
-			DB:             db,
+	userStore := repo.NewUserRepo(
+		repo.NewUserRepoParams{
 			PasswordHasher: pwHasher,
 		},
 	)
 
-	sessionStore := repo.NewSessionStore(
-		repo.NewSessionStoreParams{
-			DB: db,
-		},
-	)
+	sessionStore := repo.NewSessionRepo()
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))

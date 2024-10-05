@@ -3,6 +3,7 @@ package main
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gen"
+	"gorm.io/gen/field"
 	"gorm.io/gorm"
 	"library/internal/config"
 	"os"
@@ -10,9 +11,11 @@ import (
 
 func main() {
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "./internal/store/query",
-		OutFile: "query.go",
-		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
+		OutPath:           "./internal/store/query",
+		OutFile:           "query.go",
+		Mode:              gen.WithDefaultQuery | gen.WithQueryInterface,
+		FieldNullable:     true,
+		FieldWithIndexTag: true,
 	})
 
 	cfg := config.MustLoadConfig()
@@ -21,13 +24,55 @@ func main() {
 
 	g.WithDataTypeMap(map[string]func(columnType gorm.ColumnType) (dataType string){
 		"uuid": func(columnType gorm.ColumnType) (dataType string) {
-			//pgtype.UUID{}
+			//return "pgtype.UUID"
 			return "uuid.UUID"
 		},
 	})
 	g.ApplyBasic(g.GenerateAllTable()...)
 	g.ApplyBasic(
-		g.GenerateModel("users", gen.FieldJSONTag("password_hash", "-")),
+		g.GenerateModel(
+			"users",
+			gen.FieldJSONTag("password_hash", "-"),
+			gen.FieldGORMTag("email", func(tag field.GormTag) field.GormTag {
+				return tag.Set("uniqueIndex")
+			}),
+		),
+		g.GenerateModel(
+			"sessions",
+			gen.FieldGORMTag("user_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:CASCADE")
+			}),
+		),
+		g.GenerateModel("genres", gen.FieldGORMTag("name", func(tag field.GormTag) field.GormTag {
+			return tag.Set("uniqueIndex")
+		})),
+		g.GenerateModel(
+			"book_to_authors",
+			gen.FieldGORMTag("book_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:CASCADE")
+			}),
+			gen.FieldGORMTag("author_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:CASCADE")
+			}),
+		),
+		g.GenerateModel(
+			"book_to_genres",
+			gen.FieldGORMTag("book_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:CASCADE")
+			}),
+			gen.FieldGORMTag("genre_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:CASCADE")
+			}),
+		),
+		g.GenerateModel(
+			"book_lend_requests",
+			gen.FieldGORMTag("book_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:RESTRICT")
+			}),
+			gen.FieldGORMTag("user_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:RESTRICT")
+			}),
+		),
 	)
 
 	g.Execute()

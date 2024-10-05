@@ -36,7 +36,7 @@ func newSession(db *gorm.DB, opts ...gen.DOOption) session {
 }
 
 type session struct {
-	sessionDo
+	sessionDo sessionDo
 
 	ALL    field.Asterisk
 	ID     field.Field
@@ -64,6 +64,14 @@ func (s *session) updateTableName(table string) *session {
 
 	return s
 }
+
+func (s *session) WithContext(ctx context.Context) ISessionDo { return s.sessionDo.WithContext(ctx) }
+
+func (s session) TableName() string { return s.sessionDo.TableName() }
+
+func (s session) Alias() string { return s.sessionDo.Alias() }
+
+func (s session) Columns(cols ...field.Expr) gen.Columns { return s.sessionDo.Columns(cols...) }
 
 func (s *session) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 	_f, ok := s.fieldMap[fieldName]

@@ -36,7 +36,7 @@ func newGenre(db *gorm.DB, opts ...gen.DOOption) genre {
 }
 
 type genre struct {
-	genreDo
+	genreDo genreDo
 
 	ALL  field.Asterisk
 	ID   field.Int16
@@ -64,6 +64,14 @@ func (g *genre) updateTableName(table string) *genre {
 
 	return g
 }
+
+func (g *genre) WithContext(ctx context.Context) IGenreDo { return g.genreDo.WithContext(ctx) }
+
+func (g genre) TableName() string { return g.genreDo.TableName() }
+
+func (g genre) Alias() string { return g.genreDo.Alias() }
+
+func (g genre) Columns(cols ...field.Expr) gen.Columns { return g.genreDo.Columns(cols...) }
 
 func (g *genre) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 	_f, ok := g.fieldMap[fieldName]

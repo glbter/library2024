@@ -11,8 +11,8 @@ const TableNameBookLendRequest = "book_lend_requests"
 // BookLendRequest mapped from table <book_lend_requests>
 type BookLendRequest struct {
 	ID     uuid.UUID `gorm:"column:id;primaryKey;default:uuid_generate_v7()" json:"id"`
-	UserID int64     `gorm:"column:user_id;not null" json:"user_id"`
-	BookID int64     `gorm:"column:book_id;not null" json:"book_id"`
+	UserID int64     `gorm:"column:user_id;not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"user_id"`
+	BookID int64     `gorm:"column:book_id;not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"book_id"`
 }
 
 // TableName BookLendRequest's table name

@@ -11,7 +11,7 @@ const TableNameSession = "sessions"
 // Session mapped from table <sessions>
 type Session struct {
 	ID     uuid.UUID `gorm:"column:id;primaryKey;default:uuid_generate_v7()" json:"id"`
-	UserID int64     `gorm:"column:user_id;not null" json:"user_id"`
+	UserID int64     `gorm:"column:user_id;not null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user_id"`
 }
 
 // TableName Session's table name

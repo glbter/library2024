@@ -28,7 +28,7 @@ func TestRegisterUserHandler(t *testing.T) {
 			email:              "test@example.com",
 			password:           "password",
 			expectedStatusCode: http.StatusOK,
-			expectedBody:       []byte(`<h1>Registration successful</h1><p>Go to <a href="login">login</a></p>`),
+			expectedBody:       []byte(`<h1>Registration successful</h1><p>Go to <a href="/login">login</a></p>`),
 		},
 		{
 			name:               "fail - error creating user",

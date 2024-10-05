@@ -2,6 +2,7 @@ package db
 
 import (
 	"library/internal/store/model"
+	"library/internal/store/query"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -39,10 +40,11 @@ func MustOpen(dsn string) *gorm.DB {
 		&model.BookLendTransaction{},
 		&model.BookReturnTransaction{},
 	)
-
 	if err != nil {
 		panic(err)
 	}
+
+	query.SetDefault(db)
 
 	return db
 }

@@ -36,7 +36,7 @@ func newAuthor(db *gorm.DB, opts ...gen.DOOption) author {
 }
 
 type author struct {
-	authorDo
+	authorDo authorDo
 
 	ALL         field.Asterisk
 	ID          field.Int64
@@ -64,6 +64,14 @@ func (a *author) updateTableName(table string) *author {
 
 	return a
 }
+
+func (a *author) WithContext(ctx context.Context) IAuthorDo { return a.authorDo.WithContext(ctx) }
+
+func (a author) TableName() string { return a.authorDo.TableName() }
+
+func (a author) Alias() string { return a.authorDo.Alias() }
+
+func (a author) Columns(cols ...field.Expr) gen.Columns { return a.authorDo.Columns(cols...) }
 
 func (a *author) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 	_f, ok := a.fieldMap[fieldName]

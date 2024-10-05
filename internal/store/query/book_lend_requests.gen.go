@@ -37,7 +37,7 @@ func newBookLendRequest(db *gorm.DB, opts ...gen.DOOption) bookLendRequest {
 }
 
 type bookLendRequest struct {
-	bookLendRequestDo
+	bookLendRequestDo bookLendRequestDo
 
 	ALL    field.Asterisk
 	ID     field.Field
@@ -66,6 +66,18 @@ func (b *bookLendRequest) updateTableName(table string) *bookLendRequest {
 	b.fillFieldMap()
 
 	return b
+}
+
+func (b *bookLendRequest) WithContext(ctx context.Context) IBookLendRequestDo {
+	return b.bookLendRequestDo.WithContext(ctx)
+}
+
+func (b bookLendRequest) TableName() string { return b.bookLendRequestDo.TableName() }
+
+func (b bookLendRequest) Alias() string { return b.bookLendRequestDo.Alias() }
+
+func (b bookLendRequest) Columns(cols ...field.Expr) gen.Columns {
+	return b.bookLendRequestDo.Columns(cols...)
 }
 
 func (b *bookLendRequest) GetFieldByName(fieldName string) (field.OrderExpr, bool) {

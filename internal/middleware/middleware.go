@@ -10,6 +10,7 @@ import (
 	"library/internal/store"
 	"library/internal/store/model"
 	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -125,7 +126,7 @@ func (m *AuthMiddleware) AddUserToContext(next http.Handler) http.Handler {
 		sessionCookie, err := r.Cookie(m.sessionCookieName)
 
 		if err != nil {
-			fmt.Println("error getting session cookie", err)
+			slog.InfoContext(r.Context(), "error getting session cookie", slog.Any("err", err))
 			next.ServeHTTP(w, r)
 			return
 		}
