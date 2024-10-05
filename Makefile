@@ -22,7 +22,8 @@ dev:
 build:
 	make tailwind-build
 	make templ-generate
-	go build -ldflags "-X main.Environment=production" -o ./bin/$(APP_NAME) ./cmd/$(APP_NAME)/main.go
+	go build -ldflags "-X main.Environment=production" -o ./bin/ourApp ./cmd/main.go
+#	go build -ldflags "-X main.Environment=production" -o ./bin/$(APP_NAME) ./cmd/$(APP_NAME)/main.go
 
 .PHONY: vet
 vet:
