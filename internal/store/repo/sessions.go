@@ -10,8 +10,6 @@ import (
 
 type SessionRepo struct{}
 
-type NewSessionStoreParams struct{}
-
 func NewSessionRepo() SessionRepo {
 	return SessionRepo{}
 }

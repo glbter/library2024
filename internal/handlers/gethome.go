@@ -1,40 +1,63 @@
 package handlers
 
 import (
-	"library/internal/middleware"
-	"library/internal/store/model"
+	"library/internal/store"
 	"library/internal/templates"
+	"log/slog"
 	"net/http"
+	"strconv"
 )
 
-type HomeHandler struct{}
+type HomeHandler struct {
+	bookRepo store.BookRepo
+}
 
-func NewHomeHandler() *HomeHandler {
-	return &HomeHandler{}
+type NewHomeHandlerParams struct {
+	BookRepo store.BookRepo
+}
+
+func NewHomeHandler(params NewHomeHandlerParams) *HomeHandler {
+	return &HomeHandler{
+		bookRepo: params.BookRepo,
+	}
 }
 
 func (h *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	user, ok := r.Context().Value(middleware.UserKey).(*model.User)
+	q := r.URL.Query()
 
-	if !ok {
-		c := templates.GuestIndex()
-
-		err := templates.Layout(c, "My website").Render(r.Context(), w)
-
+	page := 1
+	pageParamValues, hasPage := q["page"]
+	if hasPage {
+		var err error
+		page, err = strconv.Atoi(pageParamValues[0])
 		if err != nil {
-			http.Error(w, "Error rendering template", http.StatusInternalServerError)
-			return
+			page = 1
 		}
-
-		return
 	}
 
-	c := templates.Index(user.Email)
-	err := templates.Layout(c, "My website").Render(r.Context(), w)
+	limit := 10
+	limitParamValues, hasLimit := q["limit"]
+	if hasLimit {
+		var err error
+		limit, err = strconv.Atoi(limitParamValues[0])
+		if err != nil {
+			limit = 10
+		}
+	}
+
+	books, err := h.bookRepo.GetBooksWithAuthors(r.Context(), page, limit)
+	if err != nil {
+		http.Error(w, "Error getting book list", http.StatusInternalServerError)
+		slog.ErrorContext(r.Context(), "Error getting book list", slog.Any("err", err))
+		return
+	}
+	c := templates.Index(books)
+
+	err = templates.Layout(c, "Library").Render(r.Context(), w)
 
 	if err != nil {
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
-		return
+		slog.ErrorContext(r.Context(), "Error rendering template", slog.Any("err", err))
 	}
 }

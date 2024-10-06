@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/go-chi/chi/v5"
 	"library/internal/config"
 	"library/internal/handlers"
 	"library/internal/hash/passwordHasher"
@@ -15,6 +14,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 
 	m "library/internal/middleware"
 
@@ -42,18 +43,20 @@ func main() {
 	database.MustOpen(cfg.DSN)
 	pwHasher := passwordHasher.NewHPasswordHasher()
 
-	userStore := repo.NewUserRepo(
+	userRepo := repo.NewUserRepo(
 		repo.NewUserRepoParams{
 			PasswordHasher: pwHasher,
 		},
 	)
 
-	sessionStore := repo.NewSessionRepo()
+	sessionRepo := repo.NewSessionRepo()
+
+	bookRepo := repo.NewBookRepo()
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
-	authMiddleware := m.NewAuthMiddleware(sessionStore, cfg.SessionCookieName)
+	authMiddleware := m.NewAuthMiddleware(sessionRepo, cfg.SessionCookieName)
 
 	r.Group(func(r chi.Router) {
 		r.Use(
@@ -65,22 +68,24 @@ func main() {
 
 		r.NotFound(handlers.NewNotFoundHandler().ServeHTTP)
 
-		r.Get("/", handlers.NewHomeHandler().ServeHTTP)
+		r.Get("/", handlers.NewHomeHandler(handlers.NewHomeHandlerParams{
+			BookRepo: bookRepo,
+		}).ServeHTTP)
 
 		r.Get("/about", handlers.NewAboutHandler().ServeHTTP)
 
 		r.Get("/register", handlers.NewGetRegisterHandler().ServeHTTP)
 
 		r.Post("/register", handlers.NewPostRegisterHandler(handlers.PostRegisterHandlerParams{
-			UserStore: userStore,
+			UserRepo: userRepo,
 		}).ServeHTTP)
 
 		r.Get("/login", handlers.NewGetLoginHandler().ServeHTTP)
 
 		r.Post("/login", handlers.NewPostLoginHandler(handlers.PostLoginHandlerParams{
-			UserStore:         userStore,
-			SessionStore:      sessionStore,
-			PasswordHash:      pwHasher,
+			UserStore:         userRepo,
+			SessionRepo:       sessionRepo,
+			PasswordHasher:    pwHasher,
 			SessionCookieName: cfg.SessionCookieName,
 		}).ServeHTTP)
 
