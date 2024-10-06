@@ -49,7 +49,7 @@ func TestRegisterUserHandler(t *testing.T) {
 			userStore.On("CreateUser", ctx, tc.email, tc.password).Return(tc.createUserError)
 
 			handler := NewPostRegisterHandler(PostRegisterHandlerParams{
-				UserStore: userStore,
+				UserRepo: userStore,
 			})
 			body := bytes.NewBufferString("email=" + tc.email + "&password=" + tc.password)
 			req, _ := http.NewRequest("POST", "/", body)

@@ -5,8 +5,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"library/internal/store/model"
+
+	"github.com/google/uuid"
 
 	hashmock "library/internal/hash/mock"
 	storemock "library/internal/store/mock"
@@ -40,7 +42,7 @@ func TestLogin(t *testing.T) {
 			password:                     user.PasswordHash,
 			comparePasswordAndHashResult: true,
 			getUserResult:                user,
-			createSessionResult:          &model.Session{UserID: 1, ID: sessionID},
+			createSessionResult:          &model.Session{UserID: 1, ID: pgtype.UUID{Bytes: sessionID, Valid: true}},
 			expectedStatusCode:           http.StatusOK,
 			expectedCookie: &http.Cookie{
 				Name:     "session",
@@ -86,8 +88,8 @@ func TestLogin(t *testing.T) {
 
 			handler := NewPostLoginHandler(PostLoginHandlerParams{
 				UserStore:         userStore,
-				SessionStore:      sessionStore,
-				PasswordHash:      passwordHash,
+				SessionRepo:       sessionStore,
+				PasswordHasher:    passwordHash,
 				SessionCookieName: "session",
 			})
 			body := bytes.NewBufferString("email=" + tc.email + "&password=" + tc.password)

@@ -6,6 +6,7 @@ import (
 	"library/internal/hash"
 	"library/internal/store"
 	"library/internal/templates"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -13,22 +14,22 @@ import (
 type PostLoginHandler struct {
 	userStore         store.UserRepo
 	sessionStore      store.SessionRepo
-	passwordhash      hash.PasswordHasher
+	passwordHasher    hash.PasswordHasher
 	sessionCookieName string
 }
 
 type PostLoginHandlerParams struct {
 	UserStore         store.UserRepo
-	SessionStore      store.SessionRepo
-	PasswordHash      hash.PasswordHasher
+	SessionRepo       store.SessionRepo
+	PasswordHasher    hash.PasswordHasher
 	SessionCookieName string
 }
 
 func NewPostLoginHandler(params PostLoginHandlerParams) *PostLoginHandler {
 	return &PostLoginHandler{
 		userStore:         params.UserStore,
-		sessionStore:      params.SessionStore,
-		passwordhash:      params.PasswordHash,
+		sessionStore:      params.SessionRepo,
+		passwordHasher:    params.PasswordHasher,
 		sessionCookieName: params.SessionCookieName,
 	}
 }
@@ -47,7 +48,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	passwordIsValid, err := h.passwordhash.ComparePasswordAndHash(password, user.PasswordHash)
+	passwordIsValid, err := h.passwordHasher.ComparePasswordAndHash(password, user.PasswordHash)
 
 	if err != nil || !passwordIsValid {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -60,6 +61,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		slog.ErrorContext(r.Context(), "Error creating session", slog.Any("err", err))
 		return
 	}
 

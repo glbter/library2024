@@ -11,12 +11,12 @@ type PostRegisterHandler struct {
 }
 
 type PostRegisterHandlerParams struct {
-	UserStore store.UserRepo
+	UserRepo store.UserRepo
 }
 
 func NewPostRegisterHandler(params PostRegisterHandlerParams) *PostRegisterHandler {
 	return &PostRegisterHandler{
-		userStore: params.UserStore,
+		userStore: params.UserRepo,
 	}
 }
 
