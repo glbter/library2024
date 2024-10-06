@@ -1,13 +1,26 @@
 package templates
 
-templ Index(email string) {
-    <div>
-    Welcome {email}
-    </div>
-}
+import "library/internal/store"
+import "strconv"
 
-templ GuestIndex() {
-	<div>
-	Welcome guest
-	</div>
+templ Index(books []store.BookWithAuthors) {
+    <ol class="flex flex-col">
+        for _, book := range books {
+            <li class="flex flex-col">
+                <h2>{ book.Book.Title }</h2>
+                <ul>
+                    for _, author := range book.Authors {
+                        <li>{ author.DisplayName }</li>
+                    }
+                </ul>
+                {{ 
+                    time := book.Book.PublishedOn.Time
+                    day := strconv.Itoa(time.Day())
+                    month := strconv.Itoa(int(time.Month()))
+                    year := strconv.Itoa(time.Year())
+                }}
+                <p>{ day }.{ month }.{ year }</p>
+            </li>
+        }
+    </ol>
 }

@@ -15,3 +15,13 @@ type SessionRepo interface {
 	CreateSession(ctx context.Context, userId int64) (*model.Session, error)
 	GetUserFromSession(ctx context.Context, sessionID uuid.UUID, userID int64) (*model.User, error)
 }
+
+type BookRepo interface {
+	GetBooksWithAuthors(ctx context.Context, page, limit int) ([]BookWithAuthors, error)
+	RequestBook(ctx context.Context, UserID, BookID int64) error
+}
+
+type BookWithAuthors struct {
+	Book    *model.Book
+	Authors []*model.Author
+}
