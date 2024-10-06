@@ -68,7 +68,7 @@ func main() {
 
 		r.NotFound(handlers.NewNotFoundHandler().ServeHTTP)
 
-		r.Get("/", handlers.NewHomeHandler(handlers.NewHomeHandlerParams{
+		r.Get("/", handlers.NewIndexHandler(handlers.NewIndexHandlerParams{
 			BookRepo: bookRepo,
 		}).ServeHTTP)
 

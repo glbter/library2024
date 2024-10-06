@@ -8,21 +8,21 @@ import (
 	"strconv"
 )
 
-type HomeHandler struct {
+type IndexHandler struct {
 	bookRepo store.BookRepo
 }
 
-type NewHomeHandlerParams struct {
+type NewIndexHandlerParams struct {
 	BookRepo store.BookRepo
 }
 
-func NewHomeHandler(params NewHomeHandlerParams) *HomeHandler {
-	return &HomeHandler{
+func NewIndexHandler(params NewIndexHandlerParams) *IndexHandler {
+	return &IndexHandler{
 		bookRepo: params.BookRepo,
 	}
 }
 
-func (h *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	q := r.URL.Query()
 
