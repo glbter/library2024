@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"library/internal/templates"
+	"log/slog"
 	"net/http"
 )
 
@@ -17,6 +18,6 @@ func (h *NotFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
-		return
+		slog.ErrorContext(r.Context(), "Error rendering template", slog.Any("err", err))
 	}
 }
