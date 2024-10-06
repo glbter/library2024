@@ -9,9 +9,9 @@ templ Layout(contents templ.Component, title string) {
 	<!DOCTYPE html>
 	<html lang="en" data-theme="light">
 		@head(title)
-		<body class="flex flex-col">
+		<body class="flex flex-col min-h-screen">
 			@nav()
-			<main class="flex-1 container">
+			<main class="flex-1 container p-4 mx-auto h-full">
 				@contents
 			</main>
 			@footer()
@@ -37,34 +37,37 @@ templ head(title string) {
 }
 
 templ footer() {
-	<footer class="bg-primary p-4"></footer>
+	<footer class="bg-primary p-4 mt-auto"></footer>
 }
 
 templ nav() {
 	<nav class="bg-primary p-4">
-		<div class="container flex justify-between">
-			<ol class="flex space-x-4">
+		<div class="container flex justify-between mx-auto">
+			<ul class="flex space-x-4">
 				<li>
-					<a class="text-primary-content" href="/">Home</a>
+					<a class="text-primary-content link link-hover" href="/">Home</a>
 				</li>
 				<li>
-					<a class="text-primary-content" href="/about">About</a>
+					<a class="text-primary-content link link-hover" href="/about">About</a>
 				</li>
-			</ol>
-			<ol class="flex space-x-4">
-				if middleware.GetUser(ctx) != nil {
+			</ul>
+			if middleware.GetUser(ctx) != nil {
+				<button
+					class="text-primary-content link link-hover"
+					hx-target="body"
+					hx-swap="innerHTML"
+					hx-post="/logout"
+				>Logout</button>
+			} else {
+				<ul class="flex space-x-4">
 					<li>
-						<button class="text-primary-content" hx-target="body" hx-swap="innerHTML" hx-post="/logout">Logout</button>
-					</li>
-				} else {
-					<li>
-						<a class="text-primary-content" href="/register">Register</a>
+						<a class="text-primary-content link link-hover" href="/register">Register</a>
 					</li>
 					<li>
-						<a class="text-primary-content" href="/login">Login</a>
+						<a class="text-primary-content link link-hover" href="/login">Login</a>
 					</li>
-				}
-			</ol>
+				</ul>
+			}
 		</div>
 	</nav>
 }
