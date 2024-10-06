@@ -1,5 +1,5 @@
-(function(){
-    /** @type {import("./htmx.min.js").HtmxInternalApi} */
+(function () {
+    /** @type {import("./htmx.js").HtmxInternalApi} */
     var api;
 
     var attrPrefix = 'hx-target-';
@@ -97,8 +97,8 @@
          * @param {Event} evt
          */
         onEvent: function (name, evt) {
-            if (name === "htmx:beforeSwap"    &&
-                evt.detail.xhr                &&
+            if (name === "htmx:beforeSwap" &&
+                evt.detail.xhr &&
                 evt.detail.xhr.status !== 200) {
                 if (evt.detail.target) {
                     if (htmx.config.responseTargetPrefersExisting) {
