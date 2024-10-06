@@ -30,7 +30,7 @@ func newBook(db *gorm.DB, opts ...gen.DOOption) book {
 	_book.ID = field.NewInt64(tableName, "id")
 	_book.Title = field.NewString(tableName, "title")
 	_book.Description = field.NewString(tableName, "description")
-	_book.PublihsedOn = field.NewField(tableName, "publihsed_on")
+	_book.PublishedOn = field.NewField(tableName, "published_on")
 	_book.Amount = field.NewInt16(tableName, "amount")
 
 	_book.fillFieldMap()
@@ -45,7 +45,7 @@ type book struct {
 	ID          field.Int64
 	Title       field.String
 	Description field.String
-	PublihsedOn field.Field
+	PublishedOn field.Field
 	Amount      field.Int16
 
 	fieldMap map[string]field.Expr
@@ -66,7 +66,7 @@ func (b *book) updateTableName(table string) *book {
 	b.ID = field.NewInt64(table, "id")
 	b.Title = field.NewString(table, "title")
 	b.Description = field.NewString(table, "description")
-	b.PublihsedOn = field.NewField(table, "publihsed_on")
+	b.PublishedOn = field.NewField(table, "published_on")
 	b.Amount = field.NewInt16(table, "amount")
 
 	b.fillFieldMap()
@@ -96,7 +96,7 @@ func (b *book) fillFieldMap() {
 	b.fieldMap["id"] = b.ID
 	b.fieldMap["title"] = b.Title
 	b.fieldMap["description"] = b.Description
-	b.fieldMap["publihsed_on"] = b.PublihsedOn
+	b.fieldMap["published_on"] = b.PublishedOn
 	b.fieldMap["amount"] = b.Amount
 }
 

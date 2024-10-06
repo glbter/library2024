@@ -1,12 +1,13 @@
 package main
 
 import (
+	"library/internal/config"
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
-	"library/internal/config"
-	"os"
 )
 
 func main() {
@@ -14,21 +15,34 @@ func main() {
 		OutPath:           "./internal/store/query",
 		OutFile:           "query.go",
 		Mode:              gen.WithDefaultQuery | gen.WithQueryInterface,
-		FieldNullable:     true,
+		FieldWithTypeTag:  true,
 		FieldWithIndexTag: true,
 	})
 
 	cfg := config.MustLoadConfig()
-	gormdb := mustOpen(cfg.DSN)
-	g.UseDB(gormdb)
+	db := mustOpen(cfg.DSN)
+	g.UseDB(db)
 
 	g.WithDataTypeMap(map[string]func(columnType gorm.ColumnType) (dataType string){
 		"uuid": func(columnType gorm.ColumnType) (dataType string) {
-			//return "pgtype.UUID"
+			_, hasDefaultValue := columnType.DefaultValue()
+			if hasDefaultValue {
+				return "pgtype.UUID"
+			}
 			return "uuid.UUID"
+		},
+		"text": func(columnType gorm.ColumnType) (dataType string) {
+			isNullable, ok := columnType.Nullable()
+			if ok && !isNullable {
+				return "string"
+			}
+			return "pgtype.Text"
 		},
 		"date": func(columnType gorm.ColumnType) (dataType string) {
 			return "pgtype.Date"
+		},
+		"timestamp": func(columnType gorm.ColumnType) (dataType string) {
+			return "pgtype.Timestamp"
 		},
 	})
 	g.ApplyBasic(g.GenerateAllTable()...)
@@ -36,6 +50,8 @@ func main() {
 		g.GenerateModel(
 			"users",
 			gen.FieldJSONTag("password_hash", "-"),
+			gen.FieldComment("password_hash", "Must not be exposed"),
+			gen.FieldType("password_hash", "string"),
 			gen.FieldGORMTag("email", func(tag field.GormTag) field.GormTag {
 				return tag.Set("uniqueIndex")
 			}),
@@ -73,6 +89,20 @@ func main() {
 				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:RESTRICT")
 			}),
 			gen.FieldGORMTag("user_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:RESTRICT")
+			}),
+		),
+		g.GenerateModel(
+			"book_lend_transactions",
+			gen.FieldComment("request_id", "RequestID is a foreign key to `book_lend_requests`"),
+			gen.FieldGORMTag("request_id", func(tag field.GormTag) field.GormTag {
+				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:RESTRICT")
+			}),
+		),
+		g.GenerateModel(
+			"book_return_transactions",
+			gen.FieldComment("request_id", "RequestID is a foreign key to `book_lend_requests` as well as `book_lend_transactions`"),
+			gen.FieldGORMTag("request_id", func(tag field.GormTag) field.GormTag {
 				return tag.Set("constraint", "OnUpdate:CASCADE,OnDelete:RESTRICT")
 			}),
 		),

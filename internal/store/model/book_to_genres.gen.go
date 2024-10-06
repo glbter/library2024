@@ -8,8 +8,8 @@ const TableNameBookToGenre = "book_to_genres"
 
 // BookToGenre mapped from table <book_to_genres>
 type BookToGenre struct {
-	BookID  int64 `gorm:"column:book_id;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"book_id"`
-	GenreID int16 `gorm:"column:genre_id;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"genre_id"`
+	BookID  int64 `gorm:"column:book_id;type:bigint;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"book_id"`
+	GenreID int16 `gorm:"column:genre_id;type:smallint;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"genre_id"`
 }
 
 // TableName BookToGenre's table name

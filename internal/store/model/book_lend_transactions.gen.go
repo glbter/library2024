@@ -5,8 +5,6 @@
 package model
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -15,9 +13,9 @@ const TableNameBookLendTransaction = "book_lend_transactions"
 
 // BookLendTransaction mapped from table <book_lend_transactions>
 type BookLendTransaction struct {
-	RequestID uuid.UUID   `gorm:"column:request_id;primaryKey" json:"request_id"`
-	CreatedAt time.Time   `gorm:"column:created_at;not null;default:now()" json:"created_at"`
-	DueDate   pgtype.Date `gorm:"column:due_date;not null" json:"due_date"`
+	RequestID uuid.UUID        `gorm:"column:request_id;type:uuid;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"request_id"` // RequestID is a foreign key to `book_lend_requests`
+	CreatedAt pgtype.Timestamp `gorm:"column:created_at;type:timestamp without time zone;not null;default:now()" json:"created_at"`
+	DueDate   pgtype.Date      `gorm:"column:due_date;type:date;not null" json:"due_date"`
 }
 
 // TableName BookLendTransaction's table name

@@ -28,7 +28,7 @@ func newBookReturnTransaction(db *gorm.DB, opts ...gen.DOOption) bookReturnTrans
 	tableName := _bookReturnTransaction.bookReturnTransactionDo.TableName()
 	_bookReturnTransaction.ALL = field.NewAsterisk(tableName)
 	_bookReturnTransaction.RequestID = field.NewField(tableName, "request_id")
-	_bookReturnTransaction.CreatedAt = field.NewTime(tableName, "created_at")
+	_bookReturnTransaction.CreatedAt = field.NewField(tableName, "created_at")
 
 	_bookReturnTransaction.fillFieldMap()
 
@@ -40,7 +40,7 @@ type bookReturnTransaction struct {
 
 	ALL       field.Asterisk
 	RequestID field.Field
-	CreatedAt field.Time
+	CreatedAt field.Field
 
 	fieldMap map[string]field.Expr
 }
@@ -58,7 +58,7 @@ func (b bookReturnTransaction) As(alias string) *bookReturnTransaction {
 func (b *bookReturnTransaction) updateTableName(table string) *bookReturnTransaction {
 	b.ALL = field.NewAsterisk(table)
 	b.RequestID = field.NewField(table, "request_id")
-	b.CreatedAt = field.NewTime(table, "created_at")
+	b.CreatedAt = field.NewField(table, "created_at")
 
 	b.fillFieldMap()
 

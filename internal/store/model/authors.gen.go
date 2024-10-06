@@ -8,8 +8,8 @@ const TableNameAuthor = "authors"
 
 // Author mapped from table <authors>
 type Author struct {
-	ID          int64  `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	DisplayName string `gorm:"column:display_name;not null" json:"display_name"`
+	ID          int64  `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	DisplayName string `gorm:"column:display_name;type:text;not null" json:"display_name"`
 }
 
 // TableName Author's table name

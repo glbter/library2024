@@ -5,17 +5,16 @@
 package model
 
 import (
-	"time"
-
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const TableNameBookReturnTransaction = "book_return_transactions"
 
 // BookReturnTransaction mapped from table <book_return_transactions>
 type BookReturnTransaction struct {
-	RequestID uuid.UUID `gorm:"column:request_id;primaryKey" json:"request_id"`
-	CreatedAt time.Time `gorm:"column:created_at;not null;default:now()" json:"created_at"`
+	RequestID uuid.UUID        `gorm:"column:request_id;type:uuid;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"request_id"` // RequestID is a foreign key to `book_lend_requests` as well as `book_lend_transactions`
+	CreatedAt pgtype.Timestamp `gorm:"column:created_at;type:timestamp without time zone;not null;default:now()" json:"created_at"`
 }
 
 // TableName BookReturnTransaction's table name

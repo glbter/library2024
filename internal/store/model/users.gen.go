@@ -4,15 +4,17 @@
 
 package model
 
+import "github.com/jackc/pgx/v5/pgtype"
+
 const TableNameUser = "users"
 
 // User mapped from table <users>
 type User struct {
-	ID           int64   `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	FirstName    string  `gorm:"column:first_name;not null" json:"first_name"`
-	LastName     *string `gorm:"column:last_name" json:"last_name"`
-	Email        string  `gorm:"column:email;not null;uniqueIndex" json:"email"`
-	PasswordHash string  `gorm:"column:password_hash;not null" json:"-"`
+	ID           int64       `gorm:"column:id;type:bigint;primaryKey;autoIncrement:true" json:"id"`
+	FirstName    string      `gorm:"column:first_name;type:text;not null" json:"first_name"`
+	LastName     pgtype.Text `gorm:"column:last_name;type:text" json:"last_name"`
+	Email        string      `gorm:"column:email;type:character varying(255);not null;uniqueIndex" json:"email"`
+	PasswordHash string      `gorm:"column:password_hash;type:text;not null" json:"-"` // Must not be exposed
 }
 
 // TableName User's table name

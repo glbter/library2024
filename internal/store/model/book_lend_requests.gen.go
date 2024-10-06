@@ -4,15 +4,15 @@
 
 package model
 
-import "github.com/google/uuid"
+import "github.com/jackc/pgx/v5/pgtype"
 
 const TableNameBookLendRequest = "book_lend_requests"
 
 // BookLendRequest mapped from table <book_lend_requests>
 type BookLendRequest struct {
-	ID     uuid.UUID `gorm:"column:id;primaryKey;default:uuid_generate_v7()" json:"id"`
-	UserID int64     `gorm:"column:user_id;not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"user_id"`
-	BookID int64     `gorm:"column:book_id;not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"book_id"`
+	ID     pgtype.UUID `gorm:"column:id;type:uuid;primaryKey;default:uuid_generate_v7()" json:"id"`
+	UserID int64       `gorm:"column:user_id;type:bigint;not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"user_id"`
+	BookID int64       `gorm:"column:book_id;type:bigint;not null;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"book_id"`
 }
 
 // TableName BookLendRequest's table name

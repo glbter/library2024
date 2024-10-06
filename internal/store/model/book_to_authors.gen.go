@@ -8,8 +8,8 @@ const TableNameBookToAuthor = "book_to_authors"
 
 // BookToAuthor mapped from table <book_to_authors>
 type BookToAuthor struct {
-	BookID   int64 `gorm:"column:book_id;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"book_id"`
-	AuthorID int64 `gorm:"column:author_id;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"author_id"`
+	BookID   int64 `gorm:"column:book_id;type:bigint;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"book_id"`
+	AuthorID int64 `gorm:"column:author_id;type:bigint;primaryKey;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"author_id"`
 }
 
 // TableName BookToAuthor's table name
