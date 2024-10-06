@@ -4,7 +4,7 @@ tailwind-watch:
 
 .PHONY: tailwind-build
 tailwind-build:
-	./tailwindcss -i ./static/css/input.css -o ./static/css/style.min.css --minify
+	npx tailwindcss -i ./static/css/input.css -o ./static/css/style.min.css --minify
 
 .PHONY: tailwind-build-dev
 tailwind-build-dev:
@@ -17,25 +17,22 @@ templ-generate:
 .PHONY: templ-watch
 templ-watch:
 	templ generate --watch
-	
+
 .PHONY: dev
 dev:
-	make tailwind-build-dev
-	make templ-generate
-	go build -o ./tmp/$(APP_NAME) ./cmd/$(APP_NAME)/main.go && air
+	air
 
 .PHONY: build
 build:
 	make tailwind-build
 	make templ-generate
-	go build -ldflags "-X main.Environment=production" -o ./bin/ourApp ./cmd/main.go
-#	go build -ldflags "-X main.Environment=production" -o ./bin/$(APP_NAME) ./cmd/$(APP_NAME)/main.go
+	CGO_ENABLED=0 go build -ldflags "-X main.Environment=production" -o ./bin/ourApp ./cmd/main.go
 
 .PHONY: build-dev
 build-dev:
 	make tailwind-build-dev
 	make templ-generate
-	go build -ldflags "-X main.Environment=development" -o ./tmp/$(APP_NAME) ./cmd/$(APP_NAME)/main.go
+	go build -o ./tmp/$(APP_NAME) ./cmd/$(APP_NAME)/main.go
 
 .PHONY: vet
 vet:
