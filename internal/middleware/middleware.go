@@ -6,7 +6,6 @@ import (
 	b64 "encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/google/uuid"
 	"library/internal/store"
 	"library/internal/store/model"
 	"log"
@@ -14,6 +13,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type key string
@@ -80,7 +81,6 @@ func GetNonces(ctx context.Context) Nonces {
 	}
 
 	nonces, ok := nonceSet.(Nonces)
-
 	if !ok {
 		log.Fatal("error getting nonce set - not ok")
 	}

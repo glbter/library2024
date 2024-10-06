@@ -1,5 +1,5 @@
 (function(){
-    /** @type {import("../htmx").HtmxInternalApi} */
+    /** @type {import("./htmx.min.js").HtmxInternalApi} */
     var api;
 
     var attrPrefix = 'hx-target-';
@@ -11,7 +11,7 @@
 
     /**
      * @param {HTMLElement} elt
-     * @param {number} respCode
+     * @param {number} respCodeNumber
      * @returns {HTMLElement | null}
      */
     function getRespCodeTarget(elt, respCodeNumber) {
@@ -57,7 +57,7 @@
                 }
             }
         }
-        
+
         return null;
     }
 
@@ -74,7 +74,7 @@
 
     htmx.defineExtension('response-targets', {
 
-        /** @param {import("../htmx").HtmxInternalApi} apiRef */
+        /** @param {import("./htmx.min.js").HtmxInternalApi} apiRef */
         init: function (apiRef) {
             api = apiRef;
 

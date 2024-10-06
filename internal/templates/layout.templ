@@ -1,26 +1,30 @@
 package templates
 
 import (
-	"os"
 	"library/internal/middleware"
+	"os"
 )
 
 templ Layout(contents templ.Component, title string) {
-	@header(title)
-	<body class="flex flex-col h-full">
-		@nav()
-		<main class="flex-1 container ">
-			@contents
-		</main>
-		@footer()
-	</body>
+	<!DOCTYPE html>
+	<html lang="en" data-theme="light">
+		@head(title)
+		<body class="flex flex-col">
+			@nav()
+			<main class="flex-1 container">
+				@contents
+			</main>
+			@footer()
+		</body>
+	</html>
 }
 
-templ header(title string) {
+templ head(title string) {
 	<head>
-		<title>{ title }</title>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>{ title }</title>
 		<script src="static/script/htmx.min.js" nonce={ middleware.GetHtmxNonce(ctx) }></script>
 		<script src="static/script/response-targets.js" nonce={ middleware.GetResponseTargetsNonce(ctx) }></script>
 		if os.Getenv("env") == "production" {
@@ -32,31 +36,31 @@ templ header(title string) {
 }
 
 templ footer() {
-	<footer class="bg-primary-600 p-4"></footer>
+	<footer class="bg-primary p-4"></footer>
 }
 
 templ nav() {
-	<nav class="bg-primary-600 p-4">
+	<nav class="bg-primary p-4">
 		<div class="container flex justify-between">
 			<ol class="flex space-x-4">
 				<li>
-					<a class="text-gray-200" href="/">Home</a>
+					<a class="text-primary-content" href="/">Home</a>
 				</li>
 				<li>
-					<a class="text-gray-200" href="/about">About</a>
+					<a class="text-primary-content" href="/about">About</a>
 				</li>
 			</ol>
 			<ol class="flex space-x-4">
 				if middleware.GetUser(ctx) != nil {
 					<li>
-						<button class="text-gray-200" hx-target="body" hx-swap="innerHTML" hx-post="/logout">Logout</button>
+						<button class="text-primary-content" hx-target="body" hx-swap="innerHTML" hx-post="/logout">Logout</button>
 					</li>
 				} else {
 					<li>
-						<a class="text-gray-200" href="/register">Register</a>
+						<a class="text-primary-content" href="/register">Register</a>
 					</li>
 					<li>
-						<a class="text-gray-200" href="/login">Login</a>
+						<a class="text-primary-content" href="/login">Login</a>
 					</li>
 				}
 			</ol>

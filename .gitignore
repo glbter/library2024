@@ -5,3 +5,4 @@ tmp
 *.db
 tailwindcss
 tailwindcss.exe
+/node_modules
