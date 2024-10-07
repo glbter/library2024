@@ -5,7 +5,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v5/pgtype"
 	"library/internal/store/model"
-	"library/internal/utils"
+	"library/internal/utils/encoders"
 
 	"github.com/google/uuid"
 
@@ -45,7 +45,7 @@ func TestLogin(t *testing.T) {
 			expectedStatusCode:           http.StatusOK,
 			expectedCookie: &http.Cookie{
 				Name:     "session",
-				Value:    utils.EncodeCookieValue(sessionID, 1),
+				Value:    encoders.EncodeCookieValue(sessionID, 1),
 				HttpOnly: true,
 			},
 		},

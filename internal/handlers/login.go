@@ -4,7 +4,7 @@ import (
 	"library/internal/hash"
 	"library/internal/store"
 	"library/internal/templates"
-	"library/internal/utils"
+	"library/internal/utils/encoders"
 	"log/slog"
 	"net/http"
 	"time"
@@ -87,7 +87,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookieValue := utils.EncodeCookieValue(sessionID.Bytes, userID)
+	cookieValue := encoders.EncodeCookieValue(sessionID.Bytes, userID)
 
 	expiration := time.Now().Add(365 * 24 * time.Hour)
 	cookie := http.Cookie{

@@ -1,4 +1,4 @@
-package utils
+package encoders
 
 import (
 	"github.com/google/uuid"

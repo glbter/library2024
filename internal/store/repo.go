@@ -17,7 +17,7 @@ type SessionRepo interface {
 }
 
 type BookRepo interface {
-	GetBooksWithAuthors(ctx context.Context, page, limit int) ([]BookWithAuthors, error)
+	GetBooksWithAuthors(ctx context.Context, page, limit uint) (books []BookWithAuthors, totalPages uint, err error)
 	RequestBook(ctx context.Context, UserID, BookID int64) error
 }
 

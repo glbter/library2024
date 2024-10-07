@@ -31,6 +31,9 @@ templ head(title string) {
 		} else {
 			<link rel="stylesheet" href="static/css/style.css" nonce={ middleware.GetTwNonce(ctx) }/>
 			<script src="static/script/htmx.js" nonce={ middleware.GetHtmxNonce(ctx) }></script>
+			<script nonce={ middleware.GetHtmxNonce(ctx) }>
+				htmx.logAll();
+			</script>
 		}
 		<script src="static/script/response-targets.js" nonce={ middleware.GetResponseTargetsNonce(ctx) }></script>
 	</head>
@@ -41,7 +44,7 @@ templ footer() {
 }
 
 templ nav() {
-	<nav class="bg-primary p-4">
+	<nav class="bg-primary p-4 sticky z-10 top-0">
 		<div class="container flex justify-between mx-auto">
 			<ul class="flex space-x-4">
 				<li>

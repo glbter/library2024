@@ -5,12 +5,15 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"iter"
 	"library/internal/store"
 	"library/internal/store/model"
-	"library/internal/utils"
+	"library/internal/utils/encoders"
 	"log"
 	"log/slog"
 	"net/http"
+	"slices"
+	"strings"
 )
 
 type key string
@@ -21,7 +24,7 @@ type Nonces struct {
 	Htmx            string
 	ResponseTargets string
 	Tw              string
-	HtmxCSSHash     string
+	HtmxCSSHashes   []string
 }
 
 func generateRandomString(length int) string {
@@ -44,17 +47,36 @@ func CSPMiddleware(next http.Handler) http.Handler {
 			Htmx:            generateRandomString(16),
 			ResponseTargets: generateRandomString(16),
 			Tw:              generateRandomString(16),
-			HtmxCSSHash:     "sha256-pgn1TCGZX6O77zDvy0oTODMOxemn0oj0LeCnQTRj7Kg=",
+			HtmxCSSHashes: []string{
+				"sha256-VV50kYRP+CuHcIPnOJ/AV+Q2C0IGVX7AczE6/dxv078=",
+				"sha256-cNCcTUjHx0E9D/2VhCEWby6Bd/Ow9sHRp65Rf9s3J68=",
+				"sha256-9Ccj/TQB4XGZUjlcvis7DszVKQz1ppCoyRybka1oFIA=",
+				"sha256-bsV5JivYxvGywDAZ22EZJKBFip65Ng9xoJVLbBg7bdo=",
+			},
 		}
 
 		// set nonces in context
 		ctx := context.WithValue(r.Context(), NonceKey, nonceSet)
 		// insert the nonces into the content security policy header
-		cspHeader := fmt.Sprintf("default-src 'self'; script-src 'nonce-%s' 'nonce-%s' ; style-src 'nonce-%s' '%s';",
+		cspHeader := fmt.Sprintf("default-src 'self'; script-src 'nonce-%s' 'nonce-%s' ; style-src 'nonce-%s' %s;",
 			nonceSet.Htmx,
 			nonceSet.ResponseTargets,
 			nonceSet.Tw,
-			nonceSet.HtmxCSSHash)
+			func() string {
+				sb := strings.Builder{}
+				sb.Grow(len(nonceSet.HtmxCSSHashes)*(51+2) + (len(nonceSet.HtmxCSSHashes) - 1))
+				nextHash, _ := iter.Pull(slices.Values(nonceSet.HtmxCSSHashes))
+				for hash, hasNext := nextHash(); hasNext; hash, hasNext = nextHash() {
+					sb.WriteByte('\'')
+					sb.WriteString(hash)
+					sb.WriteByte('\'')
+					if hasNext {
+						sb.WriteByte(' ')
+					}
+				}
+				return sb.String()
+			}(),
+		)
 		w.Header().Set("Content-Security-Policy", cspHeader)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -127,7 +149,7 @@ func (m *AuthMiddleware) AddUserToContext(next http.Handler) http.Handler {
 			return
 		}
 
-		sessionID, userID, err := utils.DecodeCookieValue(sessionCookie.Value)
+		sessionID, userID, err := encoders.DecodeCookieValue(sessionCookie.Value)
 
 		if err != nil {
 			slog.InfoContext(r.Context(), "error decoding session cookie", slog.Any("err", err))

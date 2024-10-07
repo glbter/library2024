@@ -3,7 +3,7 @@ package handlers
 import (
 	"library/internal/store"
 	"library/internal/templates"
-	"log/slog"
+	"library/internal/utils/errors"
 	"net/http"
 	"strconv"
 )
@@ -22,42 +22,50 @@ func NewIndexHandler(params NewIndexHandlerParams) *IndexHandler {
 	}
 }
 
+const (
+	DefaultPage  uint = 0
+	DefaultLimit uint = 10
+)
+
 func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	q := r.URL.Query()
 
-	page := 1
+	page := DefaultPage
 	pageParamValues, hasPage := q["page"]
 	if hasPage {
-		var err error
-		page, err = strconv.Atoi(pageParamValues[0])
-		if err != nil {
-			page = 1
+		_page, err := strconv.ParseUint(pageParamValues[0], 10, strconv.IntSize)
+		if err == nil {
+			page = uint(_page)
 		}
 	}
 
-	limit := 10
+	limit := DefaultLimit
 	limitParamValues, hasLimit := q["limit"]
 	if hasLimit {
-		var err error
-		limit, err = strconv.Atoi(limitParamValues[0])
-		if err != nil {
-			limit = 10
+		_limit, err := strconv.ParseUint(limitParamValues[0], 10, strconv.IntSize)
+		if err == nil {
+			limit = uint(_limit)
 		}
 	}
 
-	books, err := h.bookRepo.GetBooksWithAuthors(r.Context(), page, limit)
+	books, totalPages, err := h.bookRepo.GetBooksWithAuthors(r.Context(), page, limit)
 	if err != nil {
-		http.Error(w, "Error getting book list", http.StatusInternalServerError)
-		slog.ErrorContext(r.Context(), "Error getting book list", slog.Any("err", err))
+		errors.ServerError(r.Context(), w, err, "Error getting book list")
 		return
 	}
-	c := templates.Index(books)
 
-	err = templates.Layout(c, "Library").Render(r.Context(), w)
+	if hxRequestHeader := r.Header.Get("HX-Request"); hxRequestHeader == "true" {
+		pageStart := r.Header.Get("HX-Trigger") == "books-start" && page >= 1
+		showPagination := r.Header.Get("HX-Trigger") == "books-pagination"
+		if err = templates.BooksListItems(books, page, totalPages, pageStart, showPagination).Render(r.Context(), w); err != nil {
+			errors.ServerError(r.Context(), w, err, "Error rendering template")
+		}
+		return
+	}
 
-	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
-		slog.ErrorContext(r.Context(), "Error rendering template", slog.Any("err", err))
+	contents := templates.Index(books, page, totalPages)
+	if err = templates.Layout(contents, "Library").Render(r.Context(), w); err != nil {
+		errors.ServerError(r.Context(), w, err, "Error rendering template")
 	}
 }

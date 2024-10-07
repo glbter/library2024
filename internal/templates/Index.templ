@@ -1,26 +1,151 @@
 package templates
 
-import "library/internal/store"
-import "strconv"
+import (
+	"fmt"
+	"library/internal/store"
+	"strconv"
+	"time"
+)
 
-templ Index(books []store.BookWithAuthors) {
-    <ol class="flex flex-col">
-        for _, book := range books {
-            <li class="flex flex-col">
-                <h2>{ book.Book.Title }</h2>
-                <ul>
-                    for _, author := range book.Authors {
-                        <li>{ author.DisplayName }</li>
-                    }
-                </ul>
-                {{ 
-                    time := book.Book.PublishedOn.Time
-                    day := strconv.Itoa(time.Day())
-                    month := strconv.Itoa(int(time.Month()))
-                    year := strconv.Itoa(time.Year())
-                }}
-                <p>{ day }.{ month }.{ year }</p>
-            </li>
-        }
-    </ol>
+templ Index(books []store.BookWithAuthors, currentPage, totalPages uint) {
+	<ol id="books" class="flex flex-col">
+		@BooksListItems(books, currentPage, totalPages, currentPage > 0, true)
+	</ol>
+}
+
+templ BooksListItems(books []store.BookWithAuthors, currentPage, totalPages uint, pageStart, showPagination bool) {
+	if pageStart {
+		<div
+			id="books-start"
+			hx-trigger="revealed"
+			hx-get={ fmt.Sprintf("?page=%d", currentPage-1) }
+			hx-swap={ fmt.Sprintf("outerHTML scroll:#book-%d:bottom", books[0].Book.ID) }
+		>
+			@spinner()
+		</div>
+	}
+	for _, book := range books {
+		<li class="flex flex-col">
+			@BookListItem(book)
+		</li>
+	}
+	if showPagination {
+		@pagination(currentPage, totalPages)
+	}
+}
+
+templ BookListItem(book store.BookWithAuthors) {
+	<a
+		id={ fmt.Sprintf("book-%d", book.Book.ID) }
+		class="border-y-[1px] py-2"
+	>
+		<h2 class="font-semibold text-lg">
+			({ strconv.FormatInt(book.Book.ID, 10) }) { book.Book.Title }
+		</h2>
+		<ul>
+			for _, author := range book.Authors {
+				<li>({ strconv.FormatInt(author.ID, 10) }) { author.DisplayName }</li>
+			}
+		</ul>
+		<p>{ dateString(book.Book.PublishedOn.Time) }</p>
+	</a>
+}
+
+func dateString(data time.Time) string {
+	return fmt.Sprintf("%02d.%02d.%d", data.Day(), data.Month(), data.Year())
+}
+
+// pagination renders a pagination component with the current page in the center.
+// ------------------------
+// | (1) | 2 | 3 | > | >> |
+// ------------------------
+//
+// ------------------------
+// | 1 | (2) | 3 | > | >> |
+// ------------------------
+//
+// ---------------------------------
+// | << | < | 2 | (3) | 4 | > | >> |
+// ---------------------------------
+//
+// ----------------------------
+// | << | < | n-2 | (n-1) | n |
+// ----------------------------
+//
+// ----------------------------
+// | << | < | n-2 | n-1 | (n) |
+// ----------------------------
+templ pagination(currentPage, totalPages uint) {
+	if currentPage < totalPages - 1 {
+		<nav
+			id="books-pagination"
+			class="flex flex-col justify-center"
+			hx-trigger="revealed"
+			hx-get={ fmt.Sprintf("?page=%d", currentPage+1) }
+			hx-swap="outerHTML scroll:none show:none"
+		>
+			@spinner()
+			@paginationButtons(currentPage, totalPages)
+		</nav>
+	} else {
+		<nav class="flex justify-center">
+			@paginationButtons(currentPage, totalPages)
+		</nav>
+	}
+}
+
+templ paginationButtons(currentPage, totalPages uint) {
+	<div class="grid grid-flow-col grid-cols-7 text-center">
+		if currentPage > 1 {
+			<a href="?page=0">{ `<<` }</a>
+			<a href={ pageQueryParam(currentPage - 1) }>{ `<` }</a>
+		} else {
+			<span class="col-span-2"></span>
+		}
+		for col, i := 3, firstPageNumber(currentPage, totalPages); i <= lastPageNumber(currentPage, totalPages); i, col = i + 1, col + 1 {
+			if i == currentPage {
+				<span class={ "font-bold", colStart(col) }>{ strconv.FormatUint(uint64(i) + 1, 10) }</span>
+			} else {
+				<a href={ pageQueryParam(i) } class={ colStart(col) }>{ strconv.FormatUint(uint64(i) + 1, 10) }</a>
+			}
+		}
+		if currentPage < totalPages - 1 {
+			<a href={ pageQueryParam(currentPage + 1) }>{ `>` }</a>
+			<a href={ pageQueryParam(totalPages - 1) }>{ `>>` }</a>
+		} else {
+			<span class="col-span-2 col-start-6"></span>
+		}
+	</div>
+}
+
+func pageQueryParam(page uint) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf("?page=%d", page))
+}
+
+css colStart(col int) {
+	grid-column-start: { templ.SafeCSSProperty(strconv.Itoa(col)) };
+}
+
+func firstPageNumber(currentPage, totalPages uint) uint {
+	if currentPage == 0 {
+		return 0
+	}
+	if currentPage >= totalPages-1 {
+		return totalPages - 3
+	}
+	return currentPage - 1
+}
+
+func lastPageNumber(currentPage, totalPages uint) uint {
+	if currentPage == 0 {
+		return 2
+	}
+	if currentPage >= totalPages-1 {
+		return totalPages - 1
+	}
+	return currentPage + 1
+}
+
+templ spinner() {
+	<img class="htmx-indicator stroke-info" src="static/image/puff.svg">
 }
