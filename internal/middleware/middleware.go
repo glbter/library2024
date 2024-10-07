@@ -3,18 +3,14 @@ package middleware
 import (
 	"context"
 	"crypto/rand"
-	b64 "encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"library/internal/store"
 	"library/internal/store/model"
+	"library/internal/utils"
 	"log"
 	"log/slog"
 	"net/http"
-	"strconv"
-	"strings"
-
-	"github.com/google/uuid"
 )
 
 type key string
@@ -131,39 +127,30 @@ func (m *AuthMiddleware) AddUserToContext(next http.Handler) http.Handler {
 			return
 		}
 
-		decodedValue, err := b64.StdEncoding.DecodeString(sessionCookie.Value)
+		sessionID, userID, err := utils.DecodeCookieValue(sessionCookie.Value)
 
 		if err != nil {
+			slog.InfoContext(r.Context(), "error decoding session cookie", slog.Any("err", err))
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		splitValue := strings.Split(string(decodedValue), ":")
+		slog.InfoContext(
+			r.Context(),
+			"Decoded session cookie",
+			slog.Any("sessionID", sessionID),
+			slog.Int64("userID", userID),
+		)
 
-		if len(splitValue) != 2 {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		sessionID, err := uuid.Parse(splitValue[0])
-		if err != nil {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		userIDStr := splitValue[1]
-
-		fmt.Println("sessionID", sessionID)
-		fmt.Println("userID", userIDStr)
-
-		userID, err := strconv.ParseInt(userIDStr, 10, 64)
-		if err != nil {
-			next.ServeHTTP(w, r)
-			return
-		}
 		user, err := m.sessionStore.GetUserFromSession(r.Context(), sessionID, userID)
-
 		if err != nil {
+			slog.InfoContext(
+				r.Context(),
+				"error getting user from session",
+				slog.Any("sessionID", sessionID),
+				slog.Int64("userID", userID),
+				slog.Any("err", err),
+			)
 			next.ServeHTTP(w, r)
 			return
 		}

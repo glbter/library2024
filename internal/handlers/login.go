@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	b64 "encoding/base64"
-	"fmt"
 	"library/internal/hash"
 	"library/internal/store"
 	"library/internal/templates"
+	"library/internal/utils"
 	"log/slog"
 	"net/http"
 	"time"
@@ -56,25 +55,24 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	user, err := h.userStore.GetUser(r.Context(), email)
-
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		c := templates.LoginError()
-		c.Render(r.Context(), w)
+		if err = templates.LoginError().Render(r.Context(), w); err != nil {
+			slog.ErrorContext(r.Context(), "Error rendering login error", slog.Any("err", err))
+		}
 		return
 	}
 
 	passwordIsValid, err := h.passwordHasher.ComparePasswordAndHash(password, user.PasswordHash)
-
 	if err != nil || !passwordIsValid {
 		w.WriteHeader(http.StatusUnauthorized)
-		c := templates.LoginError()
-		c.Render(r.Context(), w)
+		if err = templates.LoginError().Render(r.Context(), w); err != nil {
+			slog.ErrorContext(r.Context(), "Error rendering login error", slog.Any("err", err))
+		}
 		return
 	}
 
 	session, err := h.sessionStore.CreateSession(r.Context(), user.ID)
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		slog.ErrorContext(r.Context(), "Error creating session", slog.Any("err", err))
@@ -83,8 +81,13 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	userID := user.ID
 	sessionID := session.ID
+	if !sessionID.Valid {
+		w.WriteHeader(http.StatusInternalServerError)
+		slog.ErrorContext(r.Context(), "Invalid sessionID", slog.Int64("userID", userID))
+		return
+	}
 
-	cookieValue := b64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%d", sessionID, userID)))
+	cookieValue := utils.EncodeCookieValue(sessionID.Bytes, userID)
 
 	expiration := time.Now().Add(365 * 24 * time.Hour)
 	cookie := http.Cookie{

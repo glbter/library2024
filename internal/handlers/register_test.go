@@ -43,7 +43,7 @@ func TestRegisterUserHandler(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert := assert.New(t)
-			userStore := &storemock.UserStoreMock{}
+			userStore := &storemock.UserRepoMock{}
 			ctx := context.Background()
 
 			userStore.On("CreateUser", ctx, tc.email, tc.password).Return(tc.createUserError)

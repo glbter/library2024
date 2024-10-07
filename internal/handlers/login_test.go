@@ -3,10 +3,9 @@ package handlers
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
-	"fmt"
 	"github.com/jackc/pgx/v5/pgtype"
 	"library/internal/store/model"
+	"library/internal/utils"
 
 	"github.com/google/uuid"
 
@@ -46,7 +45,7 @@ func TestLogin(t *testing.T) {
 			expectedStatusCode:           http.StatusOK,
 			expectedCookie: &http.Cookie{
 				Name:     "session",
-				Value:    base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:1", sessionID.String()))),
+				Value:    utils.EncodeCookieValue(sessionID, 1),
 				HttpOnly: true,
 			},
 		},
@@ -70,25 +69,25 @@ func TestLogin(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert := assert.New(t)
-			userStore := &storemock.UserStoreMock{}
-			sessionStore := &storemock.SessionStoreMock{}
+			assertions := assert.New(t)
+			userRepo := &storemock.UserRepoMock{}
+			sessionRepo := &storemock.SessionRepoMock{}
 			passwordHash := &hashmock.PasswordHashMock{}
 			ctx := context.Background()
 
-			userStore.On("GetUser", ctx, tc.email).Return(tc.getUserResult, tc.getUserError)
+			userRepo.On("GetUser", ctx, tc.email).Return(tc.getUserResult, tc.getUserError)
 
 			if tc.getUserResult != nil {
 				passwordHash.On("ComparePasswordAndHash", tc.password, tc.getUserResult.PasswordHash).Return(tc.comparePasswordAndHashResult, nil)
 			}
 
 			if tc.getUserResult != nil && tc.comparePasswordAndHashResult {
-				sessionStore.On("CreateSession", ctx, tc.getUserResult.ID).Return(tc.createSessionResult, nil)
+				sessionRepo.On("CreateSession", ctx, tc.getUserResult.ID).Return(tc.createSessionResult, nil)
 			}
 
 			handler := NewPostLoginHandler(PostLoginHandlerParams{
-				UserStore:         userStore,
-				SessionRepo:       sessionStore,
+				UserStore:         userRepo,
+				SessionRepo:       sessionRepo,
 				PasswordHasher:    passwordHash,
 				SessionCookieName: "session",
 			})
@@ -99,23 +98,23 @@ func TestLogin(t *testing.T) {
 
 			handler.ServeHTTP(rr, req)
 
-			assert.Equal(tc.expectedStatusCode, rr.Code, "handler returned wrong status code: got %v want %v", rr.Code, tc.expectedStatusCode)
+			assertions.Equal(tc.expectedStatusCode, rr.Code, "handler returned wrong status code: got %v want %v", rr.Code, tc.expectedStatusCode)
 
 			cookies := rr.Result().Cookies()
 			if tc.expectedCookie != nil {
 
 				sessionCookie := cookies[0]
 
-				assert.Equal(tc.expectedCookie.Name, sessionCookie.Name, "handler returned wrong cookie name: got %v want %v", sessionCookie.Name, tc.expectedCookie.Name)
-				assert.Equal(tc.expectedCookie.Value, sessionCookie.Value, "handler returned wrong cookie value: got %v want %v", sessionCookie.Value, tc.expectedCookie.Value)
-				assert.Equal(tc.expectedCookie.HttpOnly, sessionCookie.HttpOnly, "handler returned wrong cookie HttpOnly: got %v want %v", sessionCookie.HttpOnly, tc.expectedCookie.HttpOnly)
+				assertions.Equal(tc.expectedCookie.Name, sessionCookie.Name, "handler returned wrong cookie name: got %v want %v", sessionCookie.Name, tc.expectedCookie.Name)
+				assertions.Equal(tc.expectedCookie.Value, sessionCookie.Value, "handler returned wrong cookie value: got %v want %v", sessionCookie.Value, tc.expectedCookie.Value)
+				assertions.Equal(tc.expectedCookie.HttpOnly, sessionCookie.HttpOnly, "handler returned wrong cookie HttpOnly: got %v want %v", sessionCookie.HttpOnly, tc.expectedCookie.HttpOnly)
 			} else {
-				assert.Empty(cookies, "handler returned unexpected cookie: got %v want %v", cookies, tc.expectedCookie)
+				assertions.Empty(cookies, "handler returned unexpected cookie: got %v want %v", cookies, tc.expectedCookie)
 			}
 
-			userStore.AssertExpectations(t)
+			userRepo.AssertExpectations(t)
 			passwordHash.AssertExpectations(t)
-			sessionStore.AssertExpectations(t)
+			sessionRepo.AssertExpectations(t)
 		})
 	}
 }

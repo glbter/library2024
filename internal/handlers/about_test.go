@@ -21,7 +21,7 @@ func TestGetAboutHandler(t *testing.T) {
 		{
 			name:               "render successfully",
 			expectedStatusCode: http.StatusOK,
-			expectedBody:       []byte("My website"),
+			expectedBody:       []byte("Library - About"),
 		},
 	}
 

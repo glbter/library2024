@@ -56,5 +56,4 @@ func TestCSPMiddleware(t *testing.T) {
 
 		})
 	}
-
 }
