@@ -5,14 +5,12 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"iter"
 	"library/internal/store"
 	"library/internal/store/model"
 	"library/internal/utils/encoders"
 	"log"
 	"log/slog"
 	"net/http"
-	"slices"
 	"strings"
 )
 
@@ -65,12 +63,11 @@ func CSPMiddleware(next http.Handler) http.Handler {
 			func() string {
 				sb := strings.Builder{}
 				sb.Grow(len(nonceSet.HtmxCSSHashes)*(51+2) + (len(nonceSet.HtmxCSSHashes) - 1))
-				nextHash, _ := iter.Pull(slices.Values(nonceSet.HtmxCSSHashes))
-				for hash, hasNext := nextHash(); hasNext; hash, hasNext = nextHash() {
+				for i, hash := range nonceSet.HtmxCSSHashes {
 					sb.WriteByte('\'')
 					sb.WriteString(hash)
 					sb.WriteByte('\'')
-					if hasNext {
+					if i+1 < len(nonceSet.HtmxCSSHashes) {
 						sb.WriteByte(' ')
 					}
 				}
