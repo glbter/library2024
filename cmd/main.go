@@ -35,7 +35,9 @@ func init() {
 }
 
 func main() {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 	r := chi.NewRouter()
 
 	cfg := config.MustLoadConfig()

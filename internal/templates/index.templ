@@ -3,32 +3,22 @@ package templates
 import (
 	"fmt"
 	"library/internal/store/model"
-	"library/internal/utils/ui"
 	"strconv"
 	"time"
 )
 
 templ Index(books []model.BookWithAuthors, currentPage, totalPages uint) {
+	@BooksListItems(books, currentPage, totalPages)
+}
+
+templ BooksListItems(books []model.BookWithAuthors, currentPage, totalPages uint) {
+	@paginationTop(currentPage, totalPages)
 	<ol id="books" class="flex flex-col divide-y divide-base-300">
-		@BooksListItems(books, currentPage, totalPages, ShowPagination{Top: true, Bottom: true})
+		for _, book := range books {
+			@BookListItem(book)
+		}
 	</ol>
-}
-
-type ShowPagination struct {
-	Top    bool
-	Bottom bool
-}
-
-templ BooksListItems(books []model.BookWithAuthors, currentPage, totalPages uint, showPagination ShowPagination) {
-	if showPagination.Top {
-		@paginationTop(currentPage, totalPages)
-	}
-	for _, book := range books {
-		@BookListItem(book)
-	}
-	if showPagination.Bottom {
-		@paginationBottom(currentPage, totalPages)
-	}
+	@paginationBottom(currentPage, totalPages)
 }
 
 templ BookListItem(book model.BookWithAuthors) {
@@ -57,43 +47,23 @@ func dateString(data time.Time) string {
 }
 
 templ paginationTop(currentPage, totalPages uint) {
-	if currentPage > 0 {
-		<nav
-			id={ ui.IdPaginationTop }
-			class="flex flex-col items-center w-auto mx-auto"
-			hx-trigger="revealed"
-			hx-get={ fmt.Sprintf("?page=%d", currentPage-1) }
-			hx-swap="outerHTML scroll:none show:none"
-			hx-indicator="#spinner"
-		>
-			@paginationButtons(currentPage, totalPages)
-			@spinner()
-		</nav>
-	} else {
-		<nav class="flex justify-center">
-			@paginationButtons(currentPage, totalPages)
-		</nav>
-	}
+	<nav
+		class="flex flex-col items-center w-auto mx-auto"
+		hx-indicator="#spinner"
+	>
+		@paginationButtons(currentPage, totalPages)
+		@spinner()
+	</nav>
 }
 
 templ paginationBottom(currentPage, totalPages uint) {
-	if currentPage < totalPages - 1 {
-		<nav
-			id={ ui.IdPaginationBottom }
-			class="flex flex-col items-center w-auto mx-auto"
-			hx-trigger="revealed"
-			hx-get={ fmt.Sprintf("?page=%d", currentPage+1) }
-			hx-swap="outerHTML scroll:none show:none"
-			hx-indicator="#spinner"
-		>
-			@spinner()
-			@paginationButtons(currentPage, totalPages)
-		</nav>
-	} else {
-		<nav class="flex justify-center">
-			@paginationButtons(currentPage, totalPages)
-		</nav>
-	}
+	<nav
+		class="flex flex-col items-center w-auto mx-auto"
+		hx-indicator="#spinner"
+	>
+		@spinner()
+		@paginationButtons(currentPage, totalPages)
+	</nav>
 }
 
 // pagination renders a pagination component with the current page in the center.
@@ -120,7 +90,7 @@ templ paginationButtons(currentPage, totalPages uint) {
 	<div
 		class="grid grid-flow-col grid-cols-7 gap-1 text-center"
 		hx-target="main"
-		hx-swap="innerHTML"
+		hx-swap="innerHTML transition:true show:none"
 		hx-inherit="hx-target hx-swap"
 	>
 		if currentPage > 1 {
@@ -152,8 +122,14 @@ templ paginationButtons(currentPage, totalPages uint) {
 			}
 		}
 		if currentPage < totalPages - 1 {
-			<a class="btn btn-square btn-sm btn-ghost" href={ pageQueryParam(currentPage + 1) }>{ `>` }</a>
-			<a class="btn btn-square btn-sm btn-ghost" href={ pageQueryParam(totalPages - 1) }>{ `>>` }</a>
+			<a
+				class="btn btn-square btn-sm btn-ghost"
+				href={ pageQueryParam(currentPage + 1) }
+			>{ `>` }</a>
+			<a
+				class="btn btn-square btn-sm btn-ghost"
+				href={ pageQueryParam(totalPages - 1) }
+			>{ `>>` }</a>
 		} else {
 			<span class="col-span-2 col-start-6"></span>
 		}

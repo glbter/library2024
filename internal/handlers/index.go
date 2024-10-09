@@ -31,7 +31,7 @@ const (
 	PageQueryParam  = "page"
 	LimitQueryParam = "limit"
 	DefaultPage     = uint(0)
-	DefaultLimit    = uint(10)
+	DefaultLimit    = uint(15)
 )
 
 func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -62,8 +62,8 @@ func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hxRequestHeader := r.Header.Get(requestHeaders.HxRequest)
-	if hxRequestHeader != "true" {
+	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
+	if hxBoostedHeader != "true" {
 		contents := templates.Index(books, page, totalPages)
 		if err = templates.Layout(contents, ui.TitleHome, "/").Render(r.Context(), w); err != nil {
 			errors.ServerError(r.Context(), w, err, "Error rendering template")
@@ -71,33 +71,19 @@ func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
-	if hxBoostedHeader == "true" {
-		contents := templates.Index(books, page, totalPages)
+	contents := templates.Index(books, page, totalPages)
 
-		originUrl, _ := url.Parse(r.Header.Get(requestHeaders.HxCurrentURL))
+	originUrl, _ := url.Parse(r.Header.Get(requestHeaders.HxCurrentURL))
 
-		oobSwaps := []templ.Component{
-			templates.DisabledNavbarLink(ui.IdAnchorHome, ui.TextAnchorHome, true),
-		}
-		if anchor, anchorExists := ui.PathToAnchor[originUrl.Path]; anchorExists {
-			oobSwaps = append(oobSwaps, templates.EnabledNavbarLink(anchor.Id, anchor.Text, originUrl.Path, true))
-		}
-
-		err = templates.ContentsWithTitle(contents, ui.TitleHome, oobSwaps).Render(r.Context(), w)
-		if err != nil {
-			errors.ServerError(r.Context(), w, err, "Error rendering template")
-		}
-		return
+	oobSwaps := []templ.Component{
+		templates.DisabledNavbarLink(ui.IdAnchorHome, ui.TextAnchorHome, true),
+	}
+	if anchor, anchorExists := ui.PathToAnchor[originUrl.Path]; anchorExists {
+		oobSwaps = append(oobSwaps, templates.EnabledNavbarLink(anchor.Id, anchor.Text, originUrl.Path, true))
 	}
 
-	hxTriggerHeader := r.Header.Get(requestHeaders.HxTrigger)
-	showPagination := templates.ShowPagination{
-		Top:    hxTriggerHeader == ui.IdPaginationTop,
-		Bottom: hxTriggerHeader == ui.IdPaginationBottom,
-	}
-	if err = templates.BooksListItems(books, page, totalPages, showPagination).Render(r.Context(), w); err != nil {
+	err = templates.ContentsWithTitle(contents, ui.TitleHome, oobSwaps).Render(r.Context(), w)
+	if err != nil {
 		errors.ServerError(r.Context(), w, err, "Error rendering template")
 	}
-
 }
