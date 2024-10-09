@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func ServerError(ctx context.Context, w http.ResponseWriter, err error, message string) {
+func ServerError(ctx context.Context, w http.ResponseWriter, err error, message string, args ...any) {
 	http.Error(w, message, http.StatusInternalServerError)
-	slog.ErrorContext(ctx, message, slog.Any("err", err))
+	slog.ErrorContext(ctx, message, append([]any{slog.Any("err", err)}, args...)...)
 }

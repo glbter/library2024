@@ -1,25 +1,29 @@
 package handlers
 
 import (
+	"library/internal/templates"
+	"library/internal/utils/errors"
+	"library/internal/utils/htmx/requestHeaders"
+	"log/slog"
 	"net/http"
 	"time"
 )
 
-type PostLogoutHandler struct {
+type LogoutHandler struct {
 	sessionCookieName string
 }
 
-type PostLogoutHandlerParams struct {
+type LogoutHandlerParams struct {
 	SessionCookieName string
 }
 
-func NewPostLogoutHandler(params PostLogoutHandlerParams) *PostLogoutHandler {
-	return &PostLogoutHandler{
+func NewLogoutHandler(params LogoutHandlerParams) *LogoutHandler {
+	return &LogoutHandler{
 		sessionCookieName: params.SessionCookieName,
 	}
 }
 
-func (h *PostLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    h.sessionCookieName,
@@ -28,5 +32,16 @@ func (h *PostLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Path:    "/",
 	})
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	hxRequestHeader := r.Header.Get(requestHeaders.HxRequest)
+	if hxRequestHeader != "true" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	currentHref := r.URL.Path
+	slog.DebugContext(r.Context(), "CurrentHref: "+currentHref)
+
+	if err := templates.SignIn(currentHref).Render(r.Context(), w); err != nil {
+		errors.ServerError(r.Context(), w, err, "Error rendering template")
+	}
 }

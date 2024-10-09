@@ -1,13 +1,14 @@
 package templates
 
 templ Login() {
-	<div class="flex justify-center ">
+	<div class="flex justify-center">
 		<div hx-ext="response-targets">
 			<h1>
 				Sign in to your account
 			</h1>
 			<form
-				hx-post="/login"
+				action="/login"
+				method="post"
 				hx-trigger="submit"
 				hx-target-401="#login-error"
 			>
@@ -16,8 +17,8 @@ templ Login() {
 					<label for="email">Your email</label>
 					<input
 						id="email"
-						type="email"
 						name="email"
+						type="email"
 						placeholder="name@company.com"
 						required=""
 						autocomplete="email"
@@ -27,19 +28,26 @@ templ Login() {
 					<label for="password">Password</label>
 					<input
 						id="password"
-						type="password"
 						name="password"
+						type="password"
 						placeholder="••••••••"
 						required=""
 						autocomplete="current-password"
 					/>
 				</div>
-				<button type="submit" class="btn btn-primary btn-sm">
+				<button
+					type="submit"
+					class="btn btn-primary btn-sm"
+				>
 					Sign in
 				</button>
 				<p>
 					Don’t have an account yet?
-					<a href="/register" class="link link-secondary">Register</a>
+					<a
+						href="/register"
+						class="link link-secondary link-hover"
+						hx-target="main"
+					>Register</a>
 				</p>
 			</form>
 		</div>

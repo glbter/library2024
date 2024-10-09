@@ -5,8 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"library/internal/store"
 	"library/internal/store/model"
+	"library/internal/store/repo"
 	"library/internal/utils/encoders"
 	"log"
 	"log/slog"
@@ -120,11 +120,11 @@ func GetTwNonce(ctx context.Context) string {
 }
 
 type AuthMiddleware struct {
-	sessionStore      store.SessionRepo
+	sessionStore      repo.ISessionRepo
 	sessionCookieName string
 }
 
-func NewAuthMiddleware(sessionStore store.SessionRepo, sessionCookieName string) *AuthMiddleware {
+func NewAuthMiddleware(sessionStore repo.ISessionRepo, sessionCookieName string) *AuthMiddleware {
 	return &AuthMiddleware{
 		sessionStore:      sessionStore,
 		sessionCookieName: sessionCookieName,

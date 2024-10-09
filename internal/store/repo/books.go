@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 	"database/sql"
-	"library/internal/store"
 	"library/internal/store/model"
 	"library/internal/store/query"
 	"math"
@@ -15,11 +14,39 @@ func NewBookRepo() BookRepo {
 	return BookRepo{}
 }
 
-type ID int64
+func (r BookRepo) GetBookWithAuthors(ctx context.Context, bookID int64) (result model.BookWithAuthors, err error) {
+	err = query.Q.Transaction(func(tx *query.Query) error {
+		b := tx.Book
+		a := tx.Author
+		ba := tx.BookToAuthor
+
+		book, err := b.WithContext(ctx).
+			Where(b.ID.Eq(bookID)).
+			First()
+		if err != nil {
+			return err
+		}
+
+		authors, err := a.WithContext(ctx).
+			Join(ba, ba.AuthorID.EqCol(a.ID)).
+			Where(ba.BookID.Eq(book.ID)).
+			Find()
+		if err != nil {
+			return err
+		}
+
+		result = model.BookWithAuthors{
+			Book:    book,
+			Authors: authors,
+		}
+		return nil
+	}, &sql.TxOptions{ReadOnly: true})
+	return
+}
 
 const MaxPageLimit uint = 20
 
-func (r BookRepo) GetBooksWithAuthors(ctx context.Context, page, limit uint) (results []store.BookWithAuthors, totalPages uint, err error) {
+func (r BookRepo) GetBooksWithAuthors(ctx context.Context, page, limit uint) (results []model.BookWithAuthors, totalPages uint, err error) {
 	err = query.Q.Transaction(func(tx *query.Query) error {
 		b := tx.Book
 		a := tx.Author
@@ -40,7 +67,7 @@ func (r BookRepo) GetBooksWithAuthors(ctx context.Context, page, limit uint) (re
 
 		totalPages = uint(math.Ceil(float64(totalBooks) / float64(limit)))
 
-		results = make([]store.BookWithAuthors, 0, len(books))
+		results = make([]model.BookWithAuthors, 0, len(books))
 		for _, book := range books {
 			var authors []*model.Author
 			authors, err = a.WithContext(ctx).
@@ -51,7 +78,7 @@ func (r BookRepo) GetBooksWithAuthors(ctx context.Context, page, limit uint) (re
 				return err
 			}
 
-			results = append(results, store.BookWithAuthors{
+			results = append(results, model.BookWithAuthors{
 				Book:    book,
 				Authors: authors,
 			})

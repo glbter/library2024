@@ -1,0 +1,24 @@
+package templates
+
+import (
+	"fmt"
+	"library/internal/store/model"
+)
+
+templ Book(book model.BookWithAuthors) {
+	<h1 class="text-xl">{ book.Book.Title }</h1>
+	<ul class="inline">
+		for _, author := range book.Authors {
+			<li class="first:before:content-none before:content-[', '] before:text-secondary">
+				<a
+					href={ templ.SafeURL(fmt.Sprintf("/authors/%d", author.ID)) }
+					class="link link-hover link-secondary"
+					hx-target="main"
+				>
+					{ author.DisplayName }
+				</a>
+			</li>
+		}
+	</ul>
+	<p>{ book.Book.Description }</p>
+}

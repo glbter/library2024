@@ -29,7 +29,7 @@ func RegisterPage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-ext=\"response-targets\"><h1>Register an account</h1><form hx-post=\"/register\" hx-trigger=\"submit\" hx-target-401=\"#register-error\"><div id=\"register-error\"></div><div><label for=\"email\">Your email</label> <input type=\"email\" name=\"email\" id=\"email\" placeholder=\"name@company.com\" required=\"\"></div><div><label for=\"password\">Password</label> <input type=\"password\" name=\"password\" id=\"password\" placeholder=\"••••••••\" required=\"\"></div><button type=\"submit\">Register</button><p>Already have an account? <a href=\"/login\">Login</a></p></form></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex justify-center\"><div hx-ext=\"response-targets\"><h1>Register an account</h1><form action=\"/register\" method=\"post\" hx-trigger=\"submit\" hx-target-401=\"#register-error\"><div id=\"register-error\" class=\"text-error\"></div><div><label for=\"email\">Your email</label> <input id=\"email\" name=\"email\" type=\"email\" placeholder=\"name@company.com\" required=\"\"></div><div><label for=\"password\">Password</label> <input id=\"password\" name=\"password\" type=\"password\" placeholder=\"••••••••\" required=\"\"></div><button type=\"submit\" class=\"btn btn-primary btn-sm\">Register</button><p>Already have an account? <a href=\"/login\" class=\"link link-secondary link-hover\" hx-target=\"main\">Login</a></p></form></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

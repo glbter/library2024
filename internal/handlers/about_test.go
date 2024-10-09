@@ -39,7 +39,12 @@ func TestGetAboutHandler(t *testing.T) {
 				Htmx:            "nonce-1234",
 				ResponseTargets: "nonce-5678",
 				Tw:              "nonce-9101",
-				HtmxCSSHash:     "sha256-pgn1TCGZX6O77zDvy0oTODMOxemn0oj0LeCnQTRj7Kg=",
+				HtmxCSSHashes: []string{
+					"sha256-VV50kYRP+CuHcIPnOJ/AV+Q2C0IGVX7AczE6/dxv078=",
+					"sha256-cNCcTUjHx0E9D/2VhCEWby6Bd/Ow9sHRp65Rf9s3J68=",
+					"sha256-9Ccj/TQB4XGZUjlcvis7DszVKQz1ppCoyRybka1oFIA=",
+					"sha256-bsV5JivYxvGywDAZ22EZJKBFip65Ng9xoJVLbBg7bdo=",
+				},
 			}
 			ctx := context.WithValue(req.Context(), middleware.NonceKey, value)
 			req = req.WithContext(ctx)

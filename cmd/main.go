@@ -43,11 +43,9 @@ func main() {
 	database.MustOpen(cfg.DSN)
 	pwHasher := passwordHasher.NewHPasswordHasher()
 
-	userRepo := repo.NewUserRepo(
-		repo.NewUserRepoParams{
-			PasswordHasher: pwHasher,
-		},
-	)
+	userRepo := repo.NewUserRepo(repo.NewUserRepoParams{
+		PasswordHasher: pwHasher,
+	})
 
 	sessionRepo := repo.NewSessionRepo()
 
@@ -89,9 +87,15 @@ func main() {
 			SessionCookieName: cfg.SessionCookieName,
 		}).ServeHTTP)
 
-		r.Post("/logout", handlers.NewPostLogoutHandler(handlers.PostLogoutHandlerParams{
+		r.Post("/logout", handlers.NewLogoutHandler(handlers.LogoutHandlerParams{
 			SessionCookieName: cfg.SessionCookieName,
 		}).ServeHTTP)
+
+		r.Route("/books", func(r chi.Router) {
+			r.Get("/{book_id}", handlers.NewGetBookHandler(handlers.NewGetBookHandlerParams{
+				BookRepo: bookRepo,
+			}).ServeHTTP)
+		})
 	})
 
 	killSig := make(chan os.Signal, 1)

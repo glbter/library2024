@@ -2,12 +2,19 @@ package handlers
 
 import (
 	"library/internal/hash"
-	"library/internal/store"
+	"library/internal/store/repo"
 	"library/internal/templates"
 	"library/internal/utils/encoders"
+	"library/internal/utils/errors"
+	"library/internal/utils/htmx/requestHeaders"
+	"library/internal/utils/htmx/responseHeaders"
+	"library/internal/utils/ui"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time"
+
+	"github.com/a-h/templ"
 )
 
 type GetLoginHandler struct{}
@@ -18,24 +25,39 @@ func NewGetLoginHandler() *GetLoginHandler {
 
 func (h *GetLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := templates.Login()
-	err := templates.Layout(c, "Library - Login").Render(r.Context(), w)
+	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
+
+	var err error
+	if hxBoostedHeader == "true" {
+		originUrl, _ := url.Parse(r.Header.Get(requestHeaders.HxCurrentURL))
+
+		oobSwaps := []templ.Component{
+			templates.DisabledNavbarLink(ui.IdAnchorLogin, ui.TextAnchorLogin, true),
+		}
+		if anchor, anchorExists := ui.PathToAnchor[originUrl.Path]; anchorExists {
+			oobSwaps = append(oobSwaps, templates.EnabledNavbarLink(anchor.Id, anchor.Text, originUrl.Path, true))
+		}
+
+		err = templates.ContentsWithTitle(c, ui.TitleLogin, oobSwaps).Render(r.Context(), w)
+	} else {
+		err = templates.Layout(c, ui.TitleLogin, "/login").Render(r.Context(), w)
+	}
 
 	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
-		slog.ErrorContext(r.Context(), "Error rendering template", slog.Any("err", err))
+		errors.ServerError(r.Context(), w, err, "Error rendering template")
 	}
 }
 
 type PostLoginHandler struct {
-	userStore         store.UserRepo
-	sessionStore      store.SessionRepo
+	userStore         repo.IUserRepo
+	sessionStore      repo.ISessionRepo
 	passwordHasher    hash.PasswordHasher
 	sessionCookieName string
 }
 
 type PostLoginHandlerParams struct {
-	UserStore         store.UserRepo
-	SessionRepo       store.SessionRepo
+	UserStore         repo.IUserRepo
+	SessionRepo       repo.ISessionRepo
 	PasswordHasher    hash.PasswordHasher
 	SessionCookieName string
 }
@@ -100,6 +122,10 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 
-	w.Header().Set("HX-Redirect", "/")
-	w.WriteHeader(http.StatusOK)
+	if r.Header.Get(requestHeaders.HxRequest) == "true" {
+		w.Header().Set(responseHeaders.HxRedirect, "/")
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
 }
