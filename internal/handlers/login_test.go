@@ -42,7 +42,7 @@ func TestLogin(t *testing.T) {
 			comparePasswordAndHashResult: true,
 			getUserResult:                user,
 			createSessionResult:          &model.Session{UserID: 1, ID: pgtype.UUID{Bytes: sessionID, Valid: true}},
-			expectedStatusCode:           http.StatusOK,
+			expectedStatusCode:           http.StatusFound,
 			expectedCookie: &http.Cookie{
 				Name:     "session",
 				Value:    encoders.EncodeCookieValue(sessionID, 1),
