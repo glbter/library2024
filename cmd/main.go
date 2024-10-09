@@ -52,6 +52,7 @@ func main() {
 	sessionRepo := repo.NewSessionRepo()
 
 	bookRepo := repo.NewBookRepo()
+	authorRepo := repo.NewAuthorRepo()
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
@@ -96,6 +97,12 @@ func main() {
 		r.Route("/books", func(r chi.Router) {
 			r.Get("/{book_id}", handlers.NewGetBookHandler(handlers.NewGetBookHandlerParams{
 				BookRepo: bookRepo,
+			}).ServeHTTP)
+		})
+
+		r.Route("/authors", func(r chi.Router) {
+			r.Get("/{author_id}", handlers.NewGetAuthorHandler(handlers.NewGetAuthorHandlerParams{
+				AuthorRepo: authorRepo,
 			}).ServeHTTP)
 		})
 	})

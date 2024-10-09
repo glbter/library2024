@@ -1,0 +1,31 @@
+package templates
+
+import (
+	"fmt"
+	"library/internal/store/model"
+	"library/internal/utils/dates"
+)
+
+templ Author(author model.AuthorWithBooks) {
+	<div class="flex flex-row items-start justify-center gap-6">
+        <div class="skeleton w-[24rem] h-[36rem]"></div>
+		<article class="prose">
+			<h1>{ author.Author.DisplayName }</h1>
+			<p>Works:</p>
+			<ul>
+				for _, book := range author.Books {
+					<li>
+						<a
+							href={ templ.SafeURL(fmt.Sprintf("/books/%d", book.ID)) }
+							class="link link-hover link-secondary"
+							hx-target="main"
+						>
+							{ book.Title }
+						</a>
+						({ dates.ShortDateString(book.PublishedOn.Time) })
+					</li>
+				}
+			</ul>
+		</article>
+	</div>
+}

@@ -3,8 +3,9 @@ package templates
 import (
 	"fmt"
 	"library/internal/store/model"
+	"library/internal/utils/dates"
+	"library/internal/utils/ui"
 	"strconv"
-	"time"
 )
 
 templ Index(books []model.BookWithAuthors, currentPage, totalPages uint) {
@@ -30,26 +31,31 @@ templ BookListItem(book model.BookWithAuthors) {
 			class="link link-hover"
 		>
 			<h2 class="font-semibold text-lg">
-				({ strconv.FormatInt(book.Book.ID, 10) }) { book.Book.Title }
+				{ book.Book.Title }
 			</h2>
 		</a>
-		<ul>
+		<ul class="inline">
 			for _, author := range book.Authors {
-				<li>({ strconv.FormatInt(author.ID, 10) }) { author.DisplayName }</li>
+				<li class="inline before:text-secondary only:before:content-['By_'] first:before:content-['By_'] before:content-[',_'] last:before:content-[',_and_']">
+					<a
+						class="link link-hover link-secondary"
+						href={ templ.SafeURL(fmt.Sprintf("/authors/%d", author.ID)) }
+						hx-target="main"
+					>
+						{ author.DisplayName }
+					</a>
+				</li>
 			}
 		</ul>
-		<p>{ dateString(book.Book.PublishedOn.Time) }</p>
+		<p class="text-sm">{ dates.ShortDateString(book.Book.PublishedOn.Time) }</p>
 	</li>
-}
-
-func dateString(data time.Time) string {
-	return fmt.Sprintf("%02d.%02d.%d", data.Day(), data.Month(), data.Year())
 }
 
 templ paginationTop(currentPage, totalPages uint) {
 	<nav
+		id={ ui.IdPaginationTop }
 		class="flex flex-col items-center w-auto mx-auto"
-		hx-indicator="#spinner"
+		hx-swap="innerHTML show:none"
 	>
 		@paginationButtons(currentPage, totalPages)
 		@spinner()
@@ -58,8 +64,9 @@ templ paginationTop(currentPage, totalPages uint) {
 
 templ paginationBottom(currentPage, totalPages uint) {
 	<nav
+		id={ ui.IdPaginationBottom }
 		class="flex flex-col items-center w-auto mx-auto"
-		hx-indicator="#spinner"
+		hx-swap="innerHTML show:window:top"
 	>
 		@spinner()
 		@paginationButtons(currentPage, totalPages)
@@ -90,7 +97,7 @@ templ paginationButtons(currentPage, totalPages uint) {
 	<div
 		class="grid grid-flow-col grid-cols-7 gap-1 text-center"
 		hx-target="main"
-		hx-swap="innerHTML show:none"
+		hx-indicator="#spinner"
 		hx-inherit="hx-target hx-swap"
 	>
 		if currentPage > 1 {
@@ -165,12 +172,8 @@ func lastPageNumber(currentPage, totalPages uint) uint {
 }
 
 templ spinner() {
-	<img
+	<span
 		id="spinner"
-		class="htmx-indicator mx-auto"
-		src="/static/image/puff.svg"
-		alt="Loading spinner"
-		width="44"
-		height="44"
-	/>
+		class="htmx-indicator mx-auto loading loading-ring loading-md text-info"
+	></span>
 }

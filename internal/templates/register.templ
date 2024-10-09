@@ -11,6 +11,7 @@ templ RegisterPage() {
 				method="post"
 				hx-trigger="submit"
 				hx-target-401="#register-error"
+				hx-target="main"
 			>
 				<div id="register-error" class="text-error"></div>
 				<div>
@@ -53,8 +54,18 @@ templ RegisterPage() {
 }
 
 templ RegisterSuccess() {
-	<h1>Registration successful</h1>
-	<p>Go to <a href="/login">login</a></p>
+	<div class="mx-auto card bg-success text-success-content w-fit">
+		<div class="card-body items-center text-center">
+			<h1 class="card-title">Registration successful</h1>
+			<div class="card-actions justify-center">
+				<a
+					href="/login"
+					class="btn btn-sm"
+					hx-target="main"
+				>Go to <u class="underline">login</u></a>
+			</div>
+		</div>
+	</div>
 }
 
 templ RegisterError() {

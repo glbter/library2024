@@ -3,22 +3,29 @@ package templates
 import (
 	"fmt"
 	"library/internal/store/model"
+	"library/internal/utils/dates"
 )
 
 templ Book(book model.BookWithAuthors) {
-	<h1 class="text-xl">{ book.Book.Title }</h1>
-	<ul class="inline">
-		for _, author := range book.Authors {
-			<li class="first:before:content-none before:content-[', '] before:text-secondary">
-				<a
-					href={ templ.SafeURL(fmt.Sprintf("/authors/%d", author.ID)) }
-					class="link link-hover link-secondary"
-					hx-target="main"
-				>
-					{ author.DisplayName }
-				</a>
-			</li>
-		}
-	</ul>
-	<p>{ book.Book.Description }</p>
+	<div class="flex flex-row items-start justify-center gap-6">
+		<div class="skeleton w-[24rem] h-[36rem]"></div>
+		<article class="max-w-[65ch]">
+			<h1 class="font-extrabold text-4xl mb-3">{ book.Book.Title }</h1>
+			<ul class="inline text-lg">
+				for _, author := range book.Authors {
+					<li class="inline only:before:content-['By_'] first:before:content-['By_'] before:content-[',_'] last:before:content-[',_and_'] before:text-secondary">
+						<a
+							href={ templ.SafeURL(fmt.Sprintf("/authors/%d", author.ID)) }
+							class="link link-hover link-secondary"
+							hx-target="main"
+						>
+							{ author.DisplayName }
+						</a>
+					</li>
+				}
+			</ul>
+			<p class="mt-3">Published on { dates.LongDateString(book.Book.PublishedOn.Time) }</p>
+			<p class="mt-3">{ book.Book.Description }</p>
+		</article>
+	</div>
 }

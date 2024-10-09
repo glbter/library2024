@@ -57,9 +57,9 @@ templ footer() {
 }
 
 templ nav(currentHref string) {
-	<nav class="bg-primary p-4 sticky z-10 top-0">
-		<div class="container flex justify-between mx-auto">
-			<ul class="flex space-x-4">
+	<nav class="bg-primary px-4">
+		<div class="navbar container flex justify-between items-center mx-auto">
+			<ul class="navbar-start flex space-x-4">
 				<li>
 					if currentHref == "/" {
 						@DisabledNavbarLink(ui.IdAnchorHome, ui.TextAnchorHome, false)
@@ -75,6 +75,7 @@ templ nav(currentHref string) {
 					}
 				</li>
 			</ul>
+			<h1 class="navbar-center text-3xl text-primary-content">Library</h1>
 			if middleware.GetUser(ctx) == nil {
 				@SignIn(currentHref)
 			} else {
@@ -85,7 +86,7 @@ templ nav(currentHref string) {
 }
 
 templ SignIn(currentHref string) {
-	<ul class="flex space-x-4">
+	<ul class="navbar-end flex space-x-4">
 		<li>
 			if currentHref == "/register" {
 				@DisabledNavbarLink(ui.IdAnchorRegister, ui.TextAnchorRegister, false)
@@ -105,6 +106,7 @@ templ SignIn(currentHref string) {
 
 templ Logout() {
 	<form
+		class="navbar-end"
 		action="/logout"
 		method="post"
 		hx-swap="outerHTML show:none"
@@ -134,6 +136,7 @@ templ EnabledNavbarLink(id, text, href string, swapOOB bool) {
 		class="text-primary-content link link-hover"
 		href={ templ.SafeURL(href) }
 		hx-target="main"
+		hx-swap="innerHTML show:none"
 		if swapOOB {
 			hx-swap-oob="true"
 		}

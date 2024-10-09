@@ -54,9 +54,12 @@ func (h *GetBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
 	if hxBoostedHeader == "true" {
 		originURL, _ := url.Parse(r.Header.Get(requestHeaders.HxCurrentURL))
-		anchor := ui.PathToAnchor[originURL.Path]
-		oobSwaps := []templ.Component{
-			templates.EnabledNavbarLink(anchor.Id, anchor.Text, originURL.Path, true),
+		var oobSwaps []templ.Component
+		if !strings.HasPrefix(originURL.Path, "/authors") {
+			anchor := ui.PathToAnchor[originURL.Path]
+			oobSwaps = []templ.Component{
+				templates.EnabledNavbarLink(anchor.Id, anchor.Text, originURL.Path, true),
+			}
 		}
 
 		err = templates.ContentsWithTitle(c, buildTitle(bookWithAuthors), oobSwaps).Render(r.Context(), w)

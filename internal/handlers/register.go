@@ -78,7 +78,7 @@ func (h *PostRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	c := templates.RegisterSuccess()
-	err = c.Render(r.Context(), w)
+	err = templates.ContentsWithTitle(c, ui.TitleRegister, nil).Render(r.Context(), w)
 
 	if err != nil {
 		http.Error(w, "error rendering template", http.StatusInternalServerError)

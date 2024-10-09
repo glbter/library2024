@@ -21,3 +21,7 @@ type IBookRepo interface {
 	GetBookWithAuthors(ctx context.Context, bookID int64) (model.BookWithAuthors, error)
 	RequestBook(ctx context.Context, userID, bookID int64) error
 }
+
+type IAuthorRepo interface {
+	GetAuthorWithBooks(ctx context.Context, authorID int64) (model.AuthorWithBooks, error)
+}

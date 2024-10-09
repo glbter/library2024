@@ -10,6 +10,8 @@ import (
 
 type SessionRepo struct{}
 
+var _ ISessionRepo = SessionRepo{}
+
 func NewSessionRepo() SessionRepo {
 	return SessionRepo{}
 }

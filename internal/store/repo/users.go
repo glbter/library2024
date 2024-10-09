@@ -11,6 +11,8 @@ type UserRepo struct {
 	passwordHasher hash.PasswordHasher
 }
 
+var _ IUserRepo = &UserRepo{}
+
 type NewUserRepoParams struct {
 	PasswordHasher hash.PasswordHasher
 }

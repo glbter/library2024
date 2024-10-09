@@ -10,6 +10,8 @@ import (
 
 type BookRepo struct{}
 
+var _ IBookRepo = BookRepo{}
+
 func NewBookRepo() BookRepo {
 	return BookRepo{}
 }
