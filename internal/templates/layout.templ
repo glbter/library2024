@@ -43,13 +43,11 @@ templ head(title string) {
 		} else {
 			<link rel="stylesheet" href="/static/css/style.css" nonce={ middleware.GetTwNonce(ctx) }/>
 			<script src="/static/script/htmx.js" nonce={ middleware.GetHtmxNonce(ctx) }></script>
-			<script nonce={ middleware.GetHtmxNonce(ctx) }>
+			<script nonce={ middleware.GetHtmxConfigNonce(ctx) }>
 				htmx.logAll();
 			</script>
 		}
-		// <script nonce={ middleware.GetHtmxNonce(ctx) }>
-		// 	// htmx.config.includeIndicatorStyles = false;
-		// </script>
+		<script src="/static/script/htmx_config.js" nonce={ middleware.GetHtmxConfigNonce(ctx) }></script>
 		<script src="/static/script/response-targets.js" nonce={ middleware.GetResponseTargetsNonce(ctx) }></script>
 	</head>
 }

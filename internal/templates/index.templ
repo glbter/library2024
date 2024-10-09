@@ -90,7 +90,7 @@ templ paginationButtons(currentPage, totalPages uint) {
 	<div
 		class="grid grid-flow-col grid-cols-7 gap-1 text-center"
 		hx-target="main"
-		hx-swap="innerHTML transition:true show:none"
+		hx-swap="innerHTML show:none"
 		hx-inherit="hx-target hx-swap"
 	>
 		if currentPage > 1 {

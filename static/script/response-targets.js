@@ -74,7 +74,7 @@
 
     htmx.defineExtension('response-targets', {
 
-        /** @param {import("./htmx.min.js").HtmxInternalApi} apiRef */
+        /** @param {import("./htmx.js").HtmxInternalApi} apiRef */
         init: function (apiRef) {
             api = apiRef;
 
