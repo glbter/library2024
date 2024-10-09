@@ -2,14 +2,17 @@ package handlers
 
 import (
 	"errors"
+	"github.com/a-h/templ"
 	"gorm.io/gorm"
 	"library/internal/store/model"
 	"library/internal/store/repo"
 	"library/internal/templates"
 	errorUtils "library/internal/utils/errors"
 	"library/internal/utils/htmx/requestHeaders"
+	"library/internal/utils/ui"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -50,7 +53,13 @@ func (h *GetBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
 	if hxBoostedHeader == "true" {
-		err = templates.ContentsWithTitle(c, buildTitle(bookWithAuthors), nil).Render(r.Context(), w)
+		originURL, _ := url.Parse(r.Header.Get(requestHeaders.HxCurrentURL))
+		anchor := ui.PathToAnchor[originURL.Path]
+		oobSwaps := []templ.Component{
+			templates.EnabledNavbarLink(anchor.Id, anchor.Text, originURL.Path, true),
+		}
+
+		err = templates.ContentsWithTitle(c, buildTitle(bookWithAuthors), oobSwaps).Render(r.Context(), w)
 	} else {
 		err = templates.Layout(c, buildTitle(bookWithAuthors), r.URL.Path).Render(r.Context(), w)
 	}
