@@ -4,7 +4,7 @@ const plugin = require('tailwindcss/plugin')
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './internal/templates/*.templ',
+    './go/internal/templates/*.templ',
     './static/image/*.svg',
   ],
   theme: {
