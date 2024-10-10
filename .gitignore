@@ -1,7 +1,7 @@
-.idea
-.vscode
-bin
-tmp
+/.idea
+/.vscode
+/go/bin
+/go/tmp
 *.db
 tailwindcss
 tailwindcss.exe

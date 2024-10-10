@@ -54,7 +54,7 @@ func main() {
 	bookRepo := repo.NewBookRepo()
 	authorRepo := repo.NewAuthorRepo()
 
-	fileServer := http.FileServer(http.Dir("./static"))
+	fileServer := http.FileServer(http.Dir("../static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
 	authMiddleware := m.NewAuthMiddleware(sessionRepo, cfg.SessionCookieName)
