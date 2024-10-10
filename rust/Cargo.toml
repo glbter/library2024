@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+members = ["crates/comments-service"]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+
+[workspace.dependencies]
+askama = "0.12"
+axum = "0.7"
+axum-htmx = "0.6"
+color-eyre = "0.6"
+sqlx = "0.8"
+tokio = "1.40"
+tracing = "0.1"
+tracing-subscriber = "0.3"

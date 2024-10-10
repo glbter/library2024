@@ -1,7 +1,9 @@
 /.idea
 /.vscode
 /go/bin
+/tmp
 /go/tmp
+/rust/target
 *.db
 tailwindcss
 tailwindcss.exe

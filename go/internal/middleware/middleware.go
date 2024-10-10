@@ -8,6 +8,7 @@ import (
 	"library/internal/store/model"
 	"library/internal/store/repo"
 	"library/internal/utils/encoders"
+	"library/internal/utils/htmx/requestHeaders"
 	"log"
 	"log/slog"
 	"net/http"
@@ -126,6 +127,14 @@ func GetResponseTargetsNonce(ctx context.Context) string {
 func GetTwNonce(ctx context.Context) string {
 	nonceSet := GetNonces(ctx)
 	return nonceSet.Tw
+}
+
+func AddVaryHeader(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", requestHeaders.HxRequest)
+		w.Header().Add("Vary", requestHeaders.HxBoosted)
+		next.ServeHTTP(w, r)
+	})
 }
 
 type AuthMiddleware struct {

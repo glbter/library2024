@@ -65,6 +65,7 @@ func main() {
 			m.TextHTMLMiddleware,
 			m.CSPMiddleware,
 			authMiddleware.AddUserToContext,
+			m.AddVaryHeader,
 		)
 
 		r.NotFound(handlers.NewNotFoundHandler().ServeHTTP)
