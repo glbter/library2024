@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"context"
-	"github.com/jackc/pgx/v5/pgtype"
 	"library/internal/store/model"
 	"library/internal/utils/encoders"
 
@@ -41,7 +40,7 @@ func TestLogin(t *testing.T) {
 			password:                     user.PasswordHash,
 			comparePasswordAndHashResult: true,
 			getUserResult:                user,
-			createSessionResult:          &model.Session{UserID: 1, ID: pgtype.UUID{Bytes: sessionID, Valid: true}},
+			createSessionResult:          &model.Session{UserID: 1, ID: sessionID},
 			expectedStatusCode:           http.StatusFound,
 			expectedCookie: &http.Cookie{
 				Name:     "session",

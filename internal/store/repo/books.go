@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"github.com/google/uuid"
 	"library/internal/store/model"
 	"library/internal/store/query"
 	"math"
@@ -95,7 +96,12 @@ func (r BookRepo) RequestBook(ctx context.Context, userID, bookID int64) error {
 	return query.Q.Transaction(func(tx *query.Query) error {
 		lr := tx.BookLendRequest
 
-		bookLendRequest := model.BookLendRequest{UserID: userID, BookID: bookID}
+		bookLendRequestID, err := uuid.NewV7()
+		if err != nil {
+			return err
+		}
+
+		bookLendRequest := model.BookLendRequest{ID: bookLendRequestID, UserID: userID, BookID: bookID}
 		if err := lr.WithContext(ctx).Create(&bookLendRequest); err != nil {
 			return err
 		}
@@ -123,7 +129,7 @@ func (r BookRepo) RequestBook(ctx context.Context, userID, bookID int64) error {
 		// lend a book
 		if dbBook != nil && dbBook.Amount > int16(count) {
 			err = lt.WithContext(ctx).
-				Create(&model.BookLendTransaction{RequestID: bookLendRequest.ID.Bytes})
+				Create(&model.BookLendTransaction{RequestID: bookLendRequestID})
 			if err != nil {
 				return err
 			}

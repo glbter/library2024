@@ -4,14 +4,14 @@
 
 package model
 
-import "github.com/jackc/pgx/v5/pgtype"
+import "github.com/google/uuid"
 
 const TableNameSession = "sessions"
 
 // Session mapped from table <sessions>
 type Session struct {
-	ID     pgtype.UUID `gorm:"column:id;type:uuid;primaryKey;default:uuid_generate_v7()" json:"id"`
-	UserID int64       `gorm:"column:user_id;type:bigint;not null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user_id"`
+	ID     uuid.UUID `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	UserID int64     `gorm:"column:user_id;type:bigint;not null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user_id"`
 }
 
 // TableName Session's table name

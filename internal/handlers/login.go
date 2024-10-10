@@ -103,13 +103,8 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	userID := user.ID
 	sessionID := session.ID
-	if !sessionID.Valid {
-		w.WriteHeader(http.StatusInternalServerError)
-		slog.ErrorContext(r.Context(), "Invalid sessionID", slog.Int64("userID", userID))
-		return
-	}
 
-	cookieValue := encoders.EncodeCookieValue(sessionID.Bytes, userID)
+	cookieValue := encoders.EncodeCookieValue(sessionID, userID)
 
 	expiration := time.Now().Add(365 * 24 * time.Hour)
 	cookie := http.Cookie{

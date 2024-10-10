@@ -17,9 +17,14 @@ func NewSessionRepo() SessionRepo {
 }
 
 func (r SessionRepo) CreateSession(ctx context.Context, userId int64) (*model.Session, error) {
-	session := model.Session{UserID: userId}
+	sessionID, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
 
-	err := query.Session.WithContext(ctx).Create(&session)
+	session := model.Session{ID: sessionID, UserID: userId}
+
+	err = query.Session.WithContext(ctx).Create(&session)
 	if err != nil {
 		return nil, err
 	}
