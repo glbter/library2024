@@ -4,6 +4,7 @@
 /tmp
 /go/tmp
 /rust/target
+/rust/crates/comments-service/*.env
 *.db
 tailwindcss
 tailwindcss.exe

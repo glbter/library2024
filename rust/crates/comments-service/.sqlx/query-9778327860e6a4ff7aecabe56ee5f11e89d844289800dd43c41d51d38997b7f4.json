@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id, c.response_to, c.text, concat_ws(' ', u.first_name, u.last_name) AS \"username!\"\nFROM comments AS c\nJOIN books AS b ON c.book_id = b.id\nJOIN users AS u ON c.user_id = u.id\nWHERE b.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "response_to",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "text",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "username!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "9778327860e6a4ff7aecabe56ee5f11e89d844289800dd43c41d51d38997b7f4"
+}
