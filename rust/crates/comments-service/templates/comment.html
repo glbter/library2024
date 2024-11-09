@@ -1,5 +1,7 @@
 <div>
-    <p>{{ username }}</p>
-    <p>{{ text }}</p>
-    {{ responses }}
+  <p>{{ username }}</p>
+  <p>{{ text }}</p>
+  {% if !responses.is_empty() %}
+  {{ responses|safe }}
+  {% endif %}
 </div>

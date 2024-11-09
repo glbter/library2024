@@ -1,5 +1,5 @@
 <ol>
-    {% for comment in self.0.values() %}
-    <li>{{ comment }}</li>
-    {% endfor %}
+  {% for comment in self.values() %}
+  <li>{{ comment|safe }}</li>
+  {% endfor %}
 </ol>

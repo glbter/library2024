@@ -4,7 +4,7 @@ use core::fmt;
 
 use askama_axum::Response;
 use axum::{body::Body, http::StatusCode, response::IntoResponse, routing::get, Router};
-use sqlx::{Database, PgPool};
+use sqlx::PgPool;
 
 use crate::repo::{CommentRepo, CommentRepoImpl};
 

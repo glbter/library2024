@@ -1,10 +1,10 @@
+use askama_axum::Template;
+use itertools::Itertools;
+use std::ops::Deref;
 use std::{
     cmp::Ordering,
     collections::{btree_map::Entry, BTreeMap},
 };
-
-use askama_axum::Template;
-use itertools::Itertools;
 use uuid::Uuid;
 
 use crate::model::dto::CommentInfo;
@@ -21,7 +21,16 @@ pub struct BookComment<'a> {
 #[derive(Debug, Default, Template)]
 #[cfg_attr(test, derive(PartialEq))]
 #[template(path = "comments.html")]
+#[repr(transparent)]
 pub struct BookComments<'a>(BTreeMap<Uuid, BookComment<'a>>);
+
+impl<'a> Deref for BookComments<'a> {
+    type Target = BTreeMap<Uuid, BookComment<'a>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl<'a> FromIterator<&'a CommentInfo> for BookComments<'a> {
     fn from_iter<T: IntoIterator<Item=&'a CommentInfo>>(iter: T) -> Self {
@@ -107,7 +116,7 @@ fn insert_responses<'a, I: Iterator<Item=&'a CommentInfo>>(
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
+    use pretty_assertions::{assert_eq, assert_str_eq};
     use std::iter;
     use std::sync::LazyLock;
 
@@ -222,16 +231,44 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "unimplemented"]
+    #[ignore = "unstable"]
     fn render_book_comments() {
-        let ids = &*COMMENTS.0;
         let comments: BookComments<'_> = COMMENTS.1.iter().collect();
 
         let result = comments.render().unwrap();
 
-        todo!();
-        // assert_str_eq!(
-        //
-        // );
+        assert_str_eq!(
+            result,
+r"<ol>
+  <li><div>
+  <p>0</p>
+  <p></p>
+</div></li>
+  <li><div>
+  <p>1</p>
+  <p></p>
+  <ol>
+  <li><div>
+  <p>2</p>
+  <p></p>
+  <ol>
+  <li><div>
+  <p>3</p>
+  <p></p>
+</div></li>
+</ol>
+</div></li>
+  <li><div>
+  <p>5</p>
+  <p></p>
+</div></li>
+</ol>
+</div></li>
+  <li><div>
+  <p>4</p>
+  <p></p>
+</div></li>
+</ol>"
+        );
     }
 }
