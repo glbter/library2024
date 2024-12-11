@@ -26,7 +26,7 @@ dev:
 build:
 	make tailwind-build
 	make templ-generate
-	CGO_ENABLED=0 go build -ldflags "-X main.Environment=production" -o ./bin/ourApp ./cmd/main.go
+	CGO_ENABLED=0 go build -ldflags "-X main.Environment=production" -mod=vendor -o ./bin/ourApp ./cmd/main.go
 
 .PHONY: build-dev
 build-dev:
