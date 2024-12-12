@@ -1,7 +1,6 @@
 use axum::{
-    body::Body,
-    extract::{Path, Query, State},
-    http::header,
+    extract::{Path, Query, State}
+    ,
     response::{IntoResponse, Response},
     Form,
 };
@@ -14,7 +13,7 @@ use crate::{
     model::{
         dto::CommentInfo,
         newtype::{BookId, CommentId},
-        template::BookComments,
+        template::{BookComment, BookComments},
     },
     repo::{CommentRepo, CommentRepoImpl},
     AppState, ResponseError,
@@ -94,13 +93,11 @@ where
     let user_id = user.id();
     let id = state
         .comment_repo()
-        .insert_by_book_id(book_id, user_id, text)
+        .insert_by_book_id(book_id, user_id, &text)
         .await
         .wrap_err_with(|| format!("inserting comment for a book {book_id} by user {user_id}"))?;
-    Ok(Response::builder()
-        .header(header::LOCATION, format!("/api/comments/{id}"))
-        .body(Body::empty())
-        .unwrap())
+    let written_comment = BookComment::fresh(&id, user.name(), &text);
+    Ok(written_comment.into_response())
 }
 
 #[instrument(skip(state))]
@@ -116,13 +113,11 @@ where
     let user_id = user.id();
     let id = state
         .comment_repo()
-        .insert_by_response_to_id(comment_id, user_id, text)
+        .insert_by_response_to_id(comment_id, user_id, &text)
         .await
         .wrap_err_with(|| {
             format!("inserting response to a comment {comment_id} by user {user_id}")
         })?;
-    Ok(Response::builder()
-        .header(header::LOCATION, format!("/api/comments/{id}"))
-        .body(Body::empty())
-        .unwrap())
+    let written_comment = BookComment::fresh(&id, user.name(), &text);
+    Ok(written_comment.into_response())
 }

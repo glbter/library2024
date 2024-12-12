@@ -1,14 +1,16 @@
 .PHONY: tailwind-watch
 tailwind-watch:
-	./tailwindcss -i ../static/css/input.css -o ../static/css/style.css --watch
+	pnpm exec tailwindcss -i ../static/css/input.css -o ../static/css/style.css --watch
 
 .PHONY: tailwind-build
 tailwind-build:
-	npx tailwindcss -i ../static/css/input.css -o ../static/css/style.min.css --minify
+	cd ..
+	npx tailwindcss -i ./static/css/input.css -o ./static/css/style.min.css --minify
 
 .PHONY: tailwind-build-dev
 tailwind-build-dev:
-	pnpm exec tailwindcss -i ../static/css/input.css -o ../static/css/style.css
+	cd ..
+	pnpm exec tailwindcss -i ./static/css/input.css -o ./static/css/style.css
 
 .PHONY: templ-generate
 templ-generate:

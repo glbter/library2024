@@ -1,7 +1,7 @@
 use std::{
+    borrow::Cow,
     cmp::Ordering,
     collections::{btree_map::Entry, BTreeMap},
-    ops::Deref,
 };
 
 use askama_axum::Template;
@@ -17,6 +17,34 @@ pub struct BookComment<'a> {
     username: &'a str,
     text: &'a str,
     responses: Responses<'a>,
+}
+
+impl<'a> BookComment<'a> {
+    pub const fn new(
+        id: &'a CommentId,
+        username: &'a str,
+        text: &'a str,
+        responses: Responses<'a>,
+    ) -> Self {
+        Self {
+            id,
+            username,
+            text,
+            responses,
+        }
+    }
+
+    pub const fn fresh(id: &'a CommentId, username: &'a str, text: &'a str) -> Self {
+        Self::new(
+            id,
+            username,
+            text,
+            Responses::Loaded(BookComments {
+                response_to: None,
+                items: BTreeMap::new(),
+            }),
+        )
+    }
 }
 
 impl<'a> From<&'a CommentInfo> for BookComment<'a> {
@@ -77,14 +105,18 @@ impl<'a> From<BookComments<'a>> for Responses<'a> {
 #[derive(Debug, Default, Template)]
 #[cfg_attr(test, derive(PartialEq))]
 #[template(path = "comments.html")]
-#[repr(transparent)]
-pub struct BookComments<'a>(BTreeMap<CommentId, BookComment<'a>>);
+pub struct BookComments<'a> {
+    response_to: Option<&'a CommentId>,
+    items: BTreeMap<&'a CommentId, BookComment<'a>>,
+}
 
-impl<'a> Deref for BookComments<'a> {
-    type Target = BTreeMap<CommentId, BookComment<'a>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+impl BookComments<'_> {
+    pub fn list_id(&self) -> Cow<'static, str> {
+        if let Some(id) = self.response_to {
+            format!("responses-to-{id}").into()
+        } else {
+            "comments".into()
+        }
     }
 }
 
@@ -92,10 +124,10 @@ impl<'a> FromIterator<&'a CommentInfo> for BookComments<'a> {
     fn from_iter<T: IntoIterator<Item = &'a CommentInfo>>(iter: T) -> Self {
         let comments = iter
             .into_iter()
-            .chunk_by(|c| c.response_to)
+            .chunk_by(|c| c.response_to.as_ref())
             .into_iter()
             .sorted_unstable_by(|(a_response_to, _), (b_response_to, _)| {
-                match (a_response_to, b_response_to) {
+                match (*a_response_to, *b_response_to) {
                     (None, None) => Ordering::Equal,
                     (None, _) => Ordering::Less,
                     (_, None) => Ordering::Greater,
@@ -104,17 +136,20 @@ impl<'a> FromIterator<&'a CommentInfo> for BookComments<'a> {
             })
             .fold(BTreeMap::new(), accumulate_comments);
 
-        Self(comments)
+        Self {
+            items: comments,
+            ..Self::default()
+        }
     }
 }
 
 fn accumulate_comments<'a>(
-    mut comments: BTreeMap<CommentId, BookComment<'a>>,
-    (response_to, responses): (Option<CommentId>, impl Iterator<Item = &'a CommentInfo>),
-) -> BTreeMap<CommentId, BookComment<'a>> {
+    mut comments: BTreeMap<&'a CommentId, BookComment<'a>>,
+    (response_to, responses): (Option<&'a CommentId>, impl Iterator<Item = &'a CommentInfo>),
+) -> BTreeMap<&'a CommentId, BookComment<'a>> {
     match response_to {
         None => comments
-            .extend(responses.map(|info @ CommentInfo { id, .. }| (*id, BookComment::from(info)))),
+            .extend(responses.map(|info @ CommentInfo { id, .. }| (id, BookComment::from(info)))),
         Some(response_to) => {
             if insert_responses(&mut comments, responses, response_to).is_some() {
                 unreachable!("could not store responses")
@@ -126,9 +161,9 @@ fn accumulate_comments<'a>(
 }
 
 fn insert_responses<'a, I>(
-    comments: &mut BTreeMap<CommentId, BookComment<'a>>,
+    comments: &mut BTreeMap<&'a CommentId, BookComment<'a>>,
     mut responses: I,
-    response_to: CommentId,
+    response_to: &'a CommentId,
 ) -> Option<I>
 where
     I: Iterator<Item = &'a CommentInfo>,
@@ -137,7 +172,7 @@ where
         Entry::Vacant(_) => {
             for comment in comments.values_mut() {
                 responses = insert_responses(
-                    &mut comment.responses.as_loaded_mut().0,
+                    &mut comment.responses.as_loaded_mut().items,
                     responses,
                     response_to,
                 )?;
@@ -145,9 +180,14 @@ where
             Some(responses)
         }
         Entry::Occupied(mut response_to) => {
-            response_to.get_mut().responses.as_loaded_mut().0.extend(
-                responses.map(|info @ CommentInfo { id, .. }| (*id, BookComment::from(info))),
-            );
+            response_to
+                .get_mut()
+                .responses
+                .as_loaded_mut()
+                .items
+                .extend(
+                    responses.map(|info @ CommentInfo { id, .. }| (id, BookComment::from(info))),
+                );
             None
         }
     }
@@ -222,66 +262,87 @@ mod tests {
 
         assert_eq!(
             result,
-            BookComments({
-                BTreeMap::from([
-                    (
-                        ids[0],
-                        BookComment {
-                            id: &ids[0],
-                            username: "0",
-                            text: "",
-                            responses: BookComments::default().into(),
-                        },
-                    ),
-                    (
-                        ids[1],
-                        BookComment {
-                            id: &ids[1],
-                            username: "1",
-                            text: "",
-                            responses: BookComments(BTreeMap::from([
-                                (
-                                    ids[2],
-                                    BookComment {
-                                        id: &ids[2],
-                                        username: "2",
-                                        text: "",
-                                        responses: BookComments(BTreeMap::from([(
-                                            ids[3],
+            BookComments {
+                response_to: None,
+                items: {
+                    BTreeMap::from([
+                        (
+                            &ids[0],
+                            BookComment {
+                                id: &ids[0],
+                                username: "0",
+                                text: "",
+                                responses: BookComments::default().into(),
+                            },
+                        ),
+                        (
+                            &ids[1],
+                            BookComment {
+                                id: &ids[1],
+                                username: "1",
+                                text: "",
+                                responses: BookComments {
+                                    response_to: Some(&ids[1]),
+                                    items: BTreeMap::from([
+                                        (
+                                            &ids[2],
                                             BookComment {
-                                                id: &ids[3],
-                                                username: "3",
+                                                id: &ids[2],
+                                                username: "2",
                                                 text: "",
-                                                responses: BookComments::default().into(),
+                                                responses: BookComments {
+                                                    response_to: Some(&ids[2]),
+                                                    items: BTreeMap::from([(
+                                                        &ids[3],
+                                                        BookComment {
+                                                            id: &ids[3],
+                                                            username: "3",
+                                                            text: "",
+                                                            responses: BookComments {
+                                                                response_to: Some(&ids[3]),
+                                                                ..BookComments::default()
+                                                            }
+                                                            .into(),
+                                                        },
+                                                    )]),
+                                                }
+                                                .into(),
                                             },
-                                        )]))
-                                        .into(),
-                                    },
-                                ),
-                                (
-                                    ids[5],
-                                    BookComment {
-                                        id: &ids[5],
-                                        username: "5",
-                                        text: "",
-                                        responses: BookComments::default().into(),
-                                    },
-                                ),
-                            ]))
-                            .into(),
-                        },
-                    ),
-                    (
-                        ids[4],
-                        BookComment {
-                            id: &ids[4],
-                            username: "4",
-                            text: "",
-                            responses: BookComments::default().into(),
-                        },
-                    ),
-                ])
-            })
+                                        ),
+                                        (
+                                            &ids[5],
+                                            BookComment {
+                                                id: &ids[5],
+                                                username: "5",
+                                                text: "",
+                                                responses: BookComments {
+                                                    response_to: Some(&ids[5]),
+                                                    ..BookComments::default()
+                                                }
+                                                .into(),
+                                            },
+                                        ),
+                                    ]),
+                                }
+                                .into(),
+                            },
+                        ),
+                        (
+                            &ids[4],
+                            BookComment {
+                                id: &ids[4],
+                                username: "4",
+                                text: "",
+                                responses: BookComments {
+                                    response_to: Some(&ids[4]),
+                                    ..BookComments::default()
+                                }
+                                .into(),
+                            },
+                        ),
+                    ])
+                }
+            }
         );
     }
 
@@ -298,57 +359,71 @@ mod tests {
 
         assert_eq!(
             result,
-            BookComments({
-                BTreeMap::from([
-                    (
-                        ids[0],
-                        BookComment {
-                            id: &ids[0],
-                            username: "0",
-                            text: "",
-                            responses: BookComments::default().into(),
-                        },
-                    ),
-                    (
-                        ids[1],
-                        BookComment {
-                            id: &ids[1],
-                            username: "1",
-                            text: "",
-                            responses: BookComments(BTreeMap::from([
-                                (
-                                    ids[2],
-                                    BookComment {
-                                        id: &ids[2],
-                                        username: "2",
-                                        text: "",
-                                        responses: Responses::NotLoaded,
-                                    },
-                                ),
-                                (
-                                    ids[5],
-                                    BookComment {
-                                        id: &ids[5],
-                                        username: "5",
-                                        text: "",
-                                        responses: BookComments::default().into(),
-                                    },
-                                ),
-                            ]))
-                            .into(),
-                        },
-                    ),
-                    (
-                        ids[4],
-                        BookComment {
-                            id: &ids[4],
-                            username: "4",
-                            text: "",
-                            responses: BookComments::default().into(),
-                        },
-                    ),
-                ])
-            })
+            BookComments {
+                response_to: None,
+                items: {
+                    BTreeMap::from([
+                        (
+                            &ids[0],
+                            BookComment {
+                                id: &ids[0],
+                                username: "0",
+                                text: "",
+                                responses: BookComments::default().into(),
+                            },
+                        ),
+                        (
+                            &ids[1],
+                            BookComment {
+                                id: &ids[1],
+                                username: "1",
+                                text: "",
+                                responses: BookComments {
+                                    response_to: Some(&ids[1]),
+                                    items: BTreeMap::from([
+                                        (
+                                            &ids[2],
+                                            BookComment {
+                                                id: &ids[2],
+                                                username: "2",
+                                                text: "",
+                                                responses: Responses::NotLoaded,
+                                            },
+                                        ),
+                                        (
+                                            &ids[5],
+                                            BookComment {
+                                                id: &ids[5],
+                                                username: "5",
+                                                text: "",
+                                                responses: BookComments {
+                                                    response_to: Some(&ids[5]),
+                                                    ..BookComments::default()
+                                                }
+                                                .into(),
+                                            },
+                                        ),
+                                    ]),
+                                }
+                                .into(),
+                            },
+                        ),
+                        (
+                            &ids[4],
+                            BookComment {
+                                id: &ids[4],
+                                username: "4",
+                                text: "",
+                                responses: BookComments {
+                                    response_to: Some(&ids[4]),
+                                    ..BookComments::default()
+                                }
+                                .into(),
+                            },
+                        ),
+                    ])
+                }
+            }
         );
     }
 

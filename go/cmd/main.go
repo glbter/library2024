@@ -63,7 +63,7 @@ func main() {
 		r.Use(
 			middleware.Logger,
 			m.TextHTMLMiddleware,
-			m.CSPMiddleware,
+			m.NewCSPMiddleware(cfg.CommentServiceURL).AddCSPHeader,
 			authMiddleware.AddUserToContext,
 			m.AddVaryHeader,
 		)
@@ -97,7 +97,8 @@ func main() {
 
 		r.Route("/books", func(r chi.Router) {
 			r.Get("/{book_id}", handlers.NewGetBookHandler(handlers.NewGetBookHandlerParams{
-				BookRepo: bookRepo,
+				BookRepo:          bookRepo,
+				CommentServiceURL: cfg.CommentServiceURL,
 			}).ServeHTTP)
 		})
 

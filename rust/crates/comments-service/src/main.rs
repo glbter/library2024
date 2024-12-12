@@ -8,6 +8,7 @@ use comments_service::{
 };
 use sqlx::PgPool;
 use tokio::net::TcpListener;
+use tracing::Level;
 use tracing_subscriber::util::SubscriberInitExt;
 
 #[tokio::main]
@@ -15,7 +16,7 @@ async fn main() -> Result<()> {
     let Args { port, lazy } = Args::parse();
 
     color_eyre::install()?;
-    tracing_subscriber::fmt().pretty().finish().try_init()?;
+    tracing_subscriber::fmt().with_max_level(Level::DEBUG).pretty().finish().try_init()?;
 
     let session_cookie_name = env::var("SESSION_COOKIE").unwrap_or("session".to_owned());
     let db_url = env::var("DATABASE_URL")?;
@@ -33,6 +34,7 @@ async fn main() -> Result<()> {
     ));
 
     let listener = TcpListener::bind((Ipv4Addr::new(0, 0, 0, 0), port)).await?;
+    println!("Listening on {}", port);
     axum::serve(listener, app).await?;
 
     Ok(())

@@ -6,13 +6,13 @@ use std::{borrow::Cow, convert::Infallible};
 use askama_axum::Response;
 use axum::{
     body::Body,
-    http::StatusCode,
+    http::{Method, StatusCode},
     response::IntoResponse,
     routing::{get, post},
     Router,
 };
 use sqlx::PgPool;
-use tower_http::trace::TraceLayer;
+use tower_http::{cors, cors::CorsLayer, trace::TraceLayer};
 
 use crate::repo::{CommentRepo, CommentRepoImpl, SessionRepo, SessionRepoImpl};
 
@@ -104,6 +104,12 @@ where
         .route(
             "/api/comments/:comment_id/responses",
             post(handler::post_comment_response::<S>),
+        )
+        .layer(
+            CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST])
+                .allow_headers(cors::Any)
+                .allow_origin(cors::Any),
         )
         .layer(TraceLayer::new_for_http())
         .with_state(state)

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::async_trait;
 use sqlx::{PgExecutor, PgPool};
 use tracing::instrument;
@@ -38,7 +40,7 @@ impl CommentRepo for &CommentRepoImpl<PgPool> {
         self,
         book_id: BookId,
         user_id: UserId,
-        text: String,
+        text: &str,
     ) -> Result<CommentId, Self::Error> {
         insert_comment_by_book_id(self.pool(), book_id, user_id, text).await
     }
@@ -48,7 +50,7 @@ impl CommentRepo for &CommentRepoImpl<PgPool> {
         self,
         response_to: CommentId,
         user_id: UserId,
-        text: String,
+        text: &str,
     ) -> Result<CommentId, Self::Error> {
         insert_comment_by_response_to_id(self.pool(), response_to, user_id, text).await
     }
@@ -95,7 +97,7 @@ async fn select_toplevel_comments_by_book_id<'c>(
 FROM comments AS c
 JOIN books AS b ON c.book_id = b.id
 JOIN users AS u ON c.user_id = u.id
-WHERE b.id = $1 AND c.response_to = NULL
+WHERE b.id = $1 AND c.response_to IS NULL
 ORDER BY c.id"#,
         book_id as BookId,
     )
@@ -132,7 +134,7 @@ async fn insert_comment_by_book_id<'c>(
     executor: impl PgExecutor<'c>,
     book_id: BookId,
     user_id: UserId,
-    text: String,
+    text: &str,
 ) -> sqlx::Result<CommentId> {
     let id = CommentId::new(Uuid::now_v7());
     sqlx::query!(
@@ -151,7 +153,7 @@ async fn insert_comment_by_response_to_id<'c>(
     executor: impl PgExecutor<'c>,
     comment_id: CommentId,
     user_id: UserId,
-    text: String,
+    text: &str,
 ) -> sqlx::Result<CommentId> {
     let id = CommentId::new(Uuid::now_v7());
     sqlx::query!(
@@ -176,26 +178,31 @@ VALUES ($1, (SELECT b.id FROM b LIMIT 1), $2, $3, $4)"#,
 impl SessionRepo for &SessionRepoImpl<PgPool> {
     type Error = sqlx::Error;
 
-    async fn validate(self, session_id: SessionId, user_id: UserId) -> Result<bool, Self::Error> {
-        validate_session_user(self.pool(), session_id, user_id).await
+    async fn select_username(
+        self,
+        session_id: SessionId,
+        user_id: UserId,
+    ) -> Result<Option<Arc<str>>, Self::Error> {
+        select_session_user_username(self.pool(), session_id, user_id).await
     }
 }
 
 #[instrument(skip(executor))]
-async fn validate_session_user<'c>(
+async fn select_session_user_username<'c>(
     executor: impl PgExecutor<'c>,
     session_id: SessionId,
     user_id: UserId,
-) -> sqlx::Result<bool> {
+) -> sqlx::Result<Option<Arc<str>>> {
     sqlx::query!(
         r#"SELECT
-    (s.user_id = $2) as "valid!"
+    concat_ws(' ', u.first_name, u.last_name) AS "username!"
 FROM sessions AS s
-WHERE s.id = $1"#,
+JOIN users AS u ON u.id = s.user_id
+WHERE s.id = $1 AND s.user_id = $2"#,
         session_id as SessionId,
         user_id as UserId,
     )
-    .fetch_one(executor)
+    .fetch_optional(executor)
     .await
-    .map(|r| r.valid)
+    .map(|r| r.map(|r| Arc::from(r.username)))
 }

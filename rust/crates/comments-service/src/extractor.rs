@@ -1,6 +1,4 @@
-use axum::{async_trait, extract::FromRequestParts, http::request::Parts, RequestPartsExt};
-use axum_extra::extract::CookieJar;
-use color_eyre::eyre::WrapErr;
+use std::sync::Arc;
 
 use crate::{
     model::newtype::UserId,
@@ -8,13 +6,24 @@ use crate::{
     util::{encoder, encoder::SessionCookie},
     AppState, ResponseError,
 };
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts, RequestPartsExt};
+use axum_extra::extract::CookieJar;
+use color_eyre::eyre::WrapErr;
+use tracing::instrument;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct User(UserId);
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct User {
+    id: UserId,
+    name: Arc<str>,
+}
 
 impl User {
-    pub const fn id(self) -> UserId {
-        self.0
+    pub const fn id(&self) -> UserId {
+        self.id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 }
 
@@ -25,6 +34,7 @@ where
 {
     type Rejection = ResponseError;
 
+    #[instrument(skip_all)]
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let cookies = parts.extract::<CookieJar>().await?;
         let session_cookie =
@@ -33,6 +43,8 @@ where
                 .ok_or(ResponseError::Unauthorized {
                     reason: "session cookie absent".into(),
                 })?;
+
+        tracing::debug!("Obtained session cookie");
 
         let SessionCookie {
             session_id,
@@ -43,14 +55,18 @@ where
             }
         })?;
 
-        let valid = state
+        tracing::debug!("{session_cookie:?}");
+
+        let username = state
             .session_repo()
-            .validate(session_id, user_id)
+            .select_username(session_id, user_id)
             .await
             .wrap_err("Failed to validate session repo")?;
 
-        if valid {
-            Ok(User(user_id))
+        tracing::debug!("Username: {username:?}");
+
+        if let Some(username) = username {
+            Ok(User { id: user_id, name: username })
         } else {
             Err(ResponseError::Unauthorized {
                 reason: "invalid session token".into(),

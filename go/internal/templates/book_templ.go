@@ -10,11 +10,12 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"library/internal/middleware"
 	"library/internal/store/model"
 	"library/internal/utils/dates"
 )
 
-func Book(book model.BookWithAuthors) templ.Component {
+func Book(book model.BookWithAuthors, commentServiceUrl string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,14 +36,14 @@ func Book(book model.BookWithAuthors) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row items-start justify-center gap-6\"><div class=\"skeleton w-[24rem] h-[36rem]\"></div><article class=\"max-w-[65ch]\"><h1 class=\"font-extrabold text-4xl mb-3\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col w-full items-center gap-6\"><div class=\"flex flex-row items-start justify-center gap-6\"><div class=\"skeleton w-[24rem] h-[36rem]\"></div><article class=\"max-w-[65ch]\"><h1 class=\"font-extrabold text-4xl mb-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(book.Book.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 13, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 15, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -53,7 +54,7 @@ func Book(book model.BookWithAuthors) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, author := range book.Authors {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"inline only:before:content-[&#39;By_&#39;] first:before:content-[&#39;By_&#39;] before:content-[&#39;,_&#39;] last:before:content-[&#39;,_and_&#39;] before:text-secondary\"><a href=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"inline only:before:content-[&#39;By_&#39;] first:before:content-[&#39;By_&#39;] before:content-[&#39;,_&#39;] last:before:content-[&#39;,_and_&#39;] before:text-secondary\" aria-label=\"Authors\"><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -69,7 +70,7 @@ func Book(book model.BookWithAuthors) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(author.DisplayName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 22, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 27, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -87,7 +88,7 @@ func Book(book model.BookWithAuthors) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(dates.LongDateString(book.Book.PublishedOn.Time))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 27, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 32, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -100,13 +101,58 @@ func Book(book model.BookWithAuthors) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(book.Book.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 28, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 33, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></article></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if middleware.GetUser(ctx) != nil {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"w-full max-w-[65ch]\" action=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" method=\"post\" hx-post=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 41, Col: 98}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"beforeend\" hx-trigger=\"#comments\"><label class=\"form-control w-full\"><span class=\"label\"><span class=\"label-text\">Comment</span></span> <textarea class=\"textarea textarea-bordered\" name=\"text\" placeholder=\"Text of your comment\"></textarea></label> <button class=\"btn btn-sm btn-outline btn-warning\" type=\"reset\">Clear</button> <button class=\"btn btn-sm btn-info\" type=\"submit\">Send</button></form>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 56, Col: 93}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"load\" hx-swap=\"outerHTML\" _=\"on click\r\n                toggle @disabled until htmx:afterOnLoad\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

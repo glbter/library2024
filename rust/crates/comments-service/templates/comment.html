@@ -1,11 +1,11 @@
-<div>
+<li id="comment-{{id}}">
   <p>{{ username }}</p>
   <p>{{ text }}</p>
   {% if let Responses::Loaded(responses) = responses %}
-    {% if !responses.is_empty() %}
+    {% if !responses.items.is_empty() %}
     {{ responses|safe }}
     {% endif %}
   {% else %}
-    <button hx-get="/api/comments/{{id}}">Load responses</button>
+    <button hx-get="/api/comments/{{id}}/responses">Load responses</button>
   {% endif %}
-</div>
+</li>

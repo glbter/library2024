@@ -18,16 +18,19 @@ import (
 )
 
 type GetBookHandler struct {
-	bookRepo repo.IBookRepo
+	bookRepo          repo.IBookRepo
+	commentServiceURL string
 }
 
 type NewGetBookHandlerParams struct {
-	BookRepo repo.IBookRepo
+	BookRepo          repo.IBookRepo
+	CommentServiceURL string
 }
 
 func NewGetBookHandler(params NewGetBookHandlerParams) *GetBookHandler {
 	return &GetBookHandler{
-		bookRepo: params.BookRepo,
+		bookRepo:          params.BookRepo,
+		commentServiceURL: params.CommentServiceURL,
 	}
 }
 
@@ -49,7 +52,7 @@ func (h *GetBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := templates.Book(bookWithAuthors)
+	c := templates.Book(bookWithAuthors, h.commentServiceURL)
 
 	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
 	if hxBoostedHeader == "true" {

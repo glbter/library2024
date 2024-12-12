@@ -29,7 +29,7 @@ serde.workspace = true
 sqlx = { workspace = true, features = ["runtime-tokio", "tls-rustls", "macros", "postgres", "uuid"] }
 thiserror.workspace = true
 tokio = { workspace = true, features = ["full"] }
-tower-http = { version = "0.6", features = ["trace"] }
+tower-http = { version = "0.6", features = ["trace", "cors"] }
 tracing.workspace = true
 tracing-subscriber.workspace = true
 uuid = { version = "1.11", features = ["serde", "v7"] }

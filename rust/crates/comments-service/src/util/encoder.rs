@@ -18,7 +18,7 @@ pub fn decode_session_cookie(
     Ok(SessionCookie {
         session_id: SessionId::new(Uuid::from_slice(&decoded_value[..16])?),
         user_id: UserId::new(i64::from_le_bytes(<[u8; 8]>::try_from(
-            &decoded_value[16..32],
+            &decoded_value[16..],
         )?)),
     })
 }
