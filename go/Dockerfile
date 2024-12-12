@@ -13,16 +13,21 @@ COPY . /app/
 WORKDIR /app
 
 RUN npm i
-RUN make build
+RUN npx tailwindcss -i ./static/css/input.css -o ./static/css/style.min.css --minify
+
+WORKDIR /app/go
+RUN CGO_ENABLED=0 go build -ldflags "-X main.Environment=production" -o ../bin/ourApp ./cmd/main.go
 
 #--------------------------------------------------------------------------------------------
+
 FROM scratch AS runtime
 
 WORKDIR /app
 
 COPY --from=builder /app/static/ static/
-COPY --from=builder /app/bin/ourApp ourApp
+COPY --from=builder /app/bin/ourApp bin/ourApp
 
 EXPOSE 4000
 
+WORKDIR bin/
 ENTRYPOINT ["./ourApp"]

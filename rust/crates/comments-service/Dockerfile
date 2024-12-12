@@ -1,17 +1,23 @@
 FROM lukemathwalker/cargo-chef:latest-rust-1.83.0 AS chef
 WORKDIR /app
-RUN apt update && apt upgrade -y &&\
-    apt install lld clang openssl libssl-dev cmake -y
+RUN apt update && apt upgrade -y --no-install-recommends &&\
+    apt install -y --no-install-recommends lld clang openssl libssl-dev cmake
+
+#--------------------------------------------------------------------
 
 FROM chef AS planner
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json --bin comments-service
+
+#--------------------------------------------------------------------
 
 FROM chef AS builder
 COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
 RUN cargo build --release --workspace --bin comments-service
+
+#--------------------------------------------------------------------
 
 FROM debian:bookworm-slim AS runtime
 WORKDIR /app
@@ -23,4 +29,6 @@ RUN apt-get update -y &&\
 COPY --from=builder /app/target/release/comments-service comments-service
 COPY crates/comments-service/migrations migrations
 
-ENTRYPOINT [ "./comments-service" ]
+EXPOSE 4000
+
+ENTRYPOINT [ "./comments-service --port=4000" ]
