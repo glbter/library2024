@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"library/internal/store/model"
+	"library/internal/store/repo"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -11,6 +12,8 @@ import (
 type UserRepoMock struct {
 	mock.Mock
 }
+
+var _ repo.IUserRepo = &UserRepoMock{}
 
 func (m *UserRepoMock) CreateUser(ctx context.Context, email string, password string) error {
 	args := m.Called(ctx, email, password)
@@ -26,6 +29,8 @@ func (m *UserRepoMock) GetUser(ctx context.Context, email string) (*model.User, 
 type SessionRepoMock struct {
 	mock.Mock
 }
+
+var _ repo.ISessionRepo = &SessionRepoMock{}
 
 func (m *SessionRepoMock) CreateSession(ctx context.Context, userId int64) (*model.Session, error) {
 	args := m.Called(ctx, userId)

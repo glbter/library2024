@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n    c.id as \"id: CommentId\",\n    NULL as \"response_to: CommentId\",\n    c.text,\n    concat_ws(' ', u.first_name, u.last_name) AS \"username!\",\n    EXISTS (SELECT 1 FROM comments AS c1 WHERE c.id = c1.response_to) AS \"has_responses!\"\nFROM comments AS c\nJOIN books AS b ON c.book_id = b.id\nJOIN users AS u ON c.user_id = u.id\nWHERE b.id = $1 AND c.response_to = NULL\nORDER BY c.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: CommentId",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "response_to: CommentId",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "text",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "username!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "has_responses!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "753c80c73ab625c565e50dace46c941f10f4bebb17a9119fb278851216a6aa74"
+}
