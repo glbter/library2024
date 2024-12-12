@@ -7,6 +7,7 @@ import daisyui from 'daisyui';
 module.exports = {
     content: [
         './go/internal/templates/*.templ',
+        './rust/**/templates/*.html',
         './static/image/*.svg',
     ],
     theme: {
