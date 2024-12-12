@@ -10,10 +10,10 @@ edition = "2021"
 askama = { version = "0.12", features = ["with-axum", "serde-json"] }
 askama_axum = { version = "0.4", features = ["serde-json"] }
 axum = "0.7"
+axum-extra = "0.9"
 axum-htmx = "0.6"
 clap = "4.5"
 color-eyre = "0.6"
-getset = "0.1"
 itertools = "0.13"
 serde = "1.0"
 sqlx = "0.8"

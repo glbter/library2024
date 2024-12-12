@@ -1,111 +1,139 @@
-use core::fmt;
-use std::{hint, num::NonZero};
+use core::fmt::{self, Formatter};
 
-use serde::{
-    de::{Error, Unexpected, Visitor},
-    Deserialize, Deserializer,
-};
+use uuid::Uuid;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, sqlx::Type)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    sqlx::Type,
+    serde::Serialize,
+    serde::Deserialize,
+)]
 #[sqlx(transparent)]
-pub struct PositiveI64(NonZero<i64>);
+#[serde(transparent)]
+#[repr(transparent)]
+pub struct BookId(i64);
 
-impl PositiveI64 {
-    pub const MIN: Self = unsafe { Self::new_unchecked(1) };
-    pub const MAX: Self = unsafe { Self::new_unchecked(i64::MAX) };
-
-    #[inline]
-    pub const fn new(value: i64) -> Option<Self> {
-        if value > 0 {
-            Some(Self(unsafe { NonZero::new_unchecked(value) }))
-        } else {
-            None
-        }
+impl BookId {
+    pub const fn new(value: i64) -> Self {
+        Self(value)
     }
 
-    #[inline]
-    pub const fn new_nonzero(value: NonZero<i64>) -> Option<Self> {
-        if value.get() > 0 {
-            Some(Self(value))
-        } else {
-            None
-        }
-    }
-
-    /// # Safety
-    /// Provided value must be greater than 0.
-    #[inline]
-    pub const unsafe fn new_unchecked(value: i64) -> Self {
-        if let Some(positive) = Self::new(value) {
-            positive
-        } else {
-            hint::unreachable_unchecked()
-        }
-    }
-
-    #[inline]
-    pub fn get(self) -> i64 {
-        self.0.get()
+    pub const fn get(self) -> i64 {
+        self.0
     }
 }
 
-impl TryFrom<i64> for PositiveI64 {
-    type Error = NonPositive;
-
-    fn try_from(value: i64) -> Result<Self, Self::Error> {
-        PositiveI64::new(value).ok_or(NonPositive)
+impl fmt::Display for BookId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
     }
 }
 
-impl TryFrom<NonZero<i64>> for PositiveI64 {
-    type Error = NonPositive;
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    sqlx::Type,
+    serde::Serialize,
+    serde::Deserialize,
+)]
+#[sqlx(transparent)]
+#[serde(transparent)]
+#[repr(transparent)]
+pub struct CommentId(Uuid);
 
-    fn try_from(value: NonZero<i64>) -> Result<Self, Self::Error> {
-        PositiveI64::new_nonzero(value).ok_or(NonPositive)
+impl CommentId {
+    pub const fn new(value: Uuid) -> Self {
+        Self(value)
+    }
+
+    pub const fn get(self) -> Uuid {
+        self.0
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-#[error("number provided is not positive")]
-pub struct NonPositive;
+impl fmt::Display for CommentId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
 
-impl<'de> Deserialize<'de> for PositiveI64 {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct PositiveVisitor;
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    sqlx::Type,
+    serde::Serialize,
+    serde::Deserialize,
+)]
+#[sqlx(transparent)]
+#[serde(transparent)]
+#[repr(transparent)]
+pub struct UserId(i64);
 
-        impl<'de> Visitor<'de> for PositiveVisitor {
-            type Value = PositiveI64;
+impl UserId {
+    pub const fn new(value: i64) -> Self {
+        Self(value)
+    }
 
-            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                f.write_str(concat!("a positive ", stringify!(i64)))
-            }
+    pub const fn get(self) -> i64 {
+        self.0
+    }
+}
 
-            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
-            where
-                E: Error,
-            {
-                match Self::Value::new(v) {
-                    Some(positive) => Ok(positive),
-                    None => Err(Error::invalid_value(Unexpected::Signed(v), &self)),
-                }
-            }
+impl fmt::Display for UserId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
+    }
+}
 
-            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
-            where
-                E: Error,
-            {
-                if v <= i64::MAX as u64 {
-                    if let Some(nonzero) = Self::Value::new(v as i64) {
-                        return Ok(nonzero);
-                    }
-                }
-                Err(Error::invalid_value(Unexpected::Unsigned(v), &self))
-            }
-        }
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    sqlx::Type,
+    serde::Serialize,
+    serde::Deserialize,
+)]
+#[sqlx(transparent)]
+#[serde(transparent)]
+#[repr(transparent)]
+pub struct SessionId(Uuid);
 
-        deserializer.deserialize_i64(PositiveVisitor)
+impl SessionId {
+    pub const fn new(value: Uuid) -> Self {
+        Self(value)
+    }
+
+    pub const fn get(self) -> Uuid {
+        self.0
+    }
+}
+
+impl fmt::Display for SessionId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
     }
 }

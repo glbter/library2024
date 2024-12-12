@@ -22,6 +22,7 @@ var NonceKey key = "nonces"
 type Nonces struct {
 	Htmx            string
 	HtmxConfig      string
+	Hyperscript     string
 	ResponseTargets string
 	Tw              string
 	HtmxCSSHashes   []string
@@ -36,7 +37,15 @@ func generateRandomString(length int) string {
 	return hex.EncodeToString(bytes)
 }
 
-func CSPMiddleware(next http.Handler) http.Handler {
+type CSPMiddleware struct {
+	commentServiceURL string
+}
+
+func NewCSPMiddleware(commentServiceURL string) *CSPMiddleware {
+	return &CSPMiddleware{commentServiceURL}
+}
+
+func (m *CSPMiddleware) AddCSPHeader(next http.Handler) http.Handler {
 	// To use the same nonces in all responses, move the Nonces
 	// struct creation to here, outside the handler.
 
@@ -45,6 +54,7 @@ func CSPMiddleware(next http.Handler) http.Handler {
 		// move to outside the handler to use the same nonces in all responses
 		nonceSet := Nonces{
 			Htmx:            generateRandomString(16),
+			Hyperscript:     generateRandomString(16),
 			HtmxConfig:      generateRandomString(16),
 			ResponseTargets: generateRandomString(16),
 			Tw:              generateRandomString(16),
@@ -59,8 +69,9 @@ func CSPMiddleware(next http.Handler) http.Handler {
 		// set nonces in context
 		ctx := context.WithValue(r.Context(), NonceKey, nonceSet)
 		// insert the nonces into the content security policy header
-		cspHeader := fmt.Sprintf("default-src 'self'; img-src 'self' data:; script-src 'nonce-%s' 'nonce-%s' 'nonce-%s'; style-src 'nonce-%s' %s;",
+		cspHeader := fmt.Sprintf("default-src 'self'; img-src 'self' data:; script-src 'nonce-%s' 'nonce-%s' 'nonce-%s' 'nonce-%s'; style-src 'nonce-%s' %s; connect-src %s/api/", // TODO: change to your domain
 			nonceSet.Htmx,
+			nonceSet.Hyperscript,
 			nonceSet.HtmxConfig,
 			nonceSet.ResponseTargets,
 			nonceSet.Tw,
@@ -77,6 +88,7 @@ func CSPMiddleware(next http.Handler) http.Handler {
 				}
 				return sb.String()
 			}(),
+			m.commentServiceURL,
 		)
 		w.Header().Set("Content-Security-Policy", cspHeader)
 
@@ -111,6 +123,12 @@ func GetHtmxNonce(ctx context.Context) string {
 	nonceSet := GetNonces(ctx)
 
 	return nonceSet.Htmx
+}
+
+func GetHyperscriptNonce(ctx context.Context) string {
+	nonceSet := GetNonces(ctx)
+
+	return nonceSet.Hyperscript
 }
 
 func GetHtmxConfigNonce(ctx context.Context) string {

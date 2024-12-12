@@ -6,6 +6,7 @@ type Config struct {
 	Port              string `envconfig:"PORT" default:":4000"`
 	DSN               string `envconfig:"DSN"`
 	SessionCookieName string `envconfig:"SESSION_COOKIE_NAME" default:"session"`
+	CommentServiceURL string `envconfig:"COMMENT_SERVICE_URL"`
 }
 
 func LoadConfig() (*Config, error) {

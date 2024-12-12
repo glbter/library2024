@@ -35,7 +35,7 @@ watcher = "cyan"
 
 [log]
 main_only = false
-time = false
+time = true
 
 [misc]
 clean_on_exit = false

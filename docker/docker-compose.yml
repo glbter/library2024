@@ -1,0 +1,27 @@
+version: "3.9"
+name: "online_library"
+services:
+  main:
+    container_name: "main"
+    build:
+      context: ..
+      dockerfile: go/Dockerfile
+    ports:
+      - "4000:4000"
+    networks:
+      app:
+
+  comments-service:
+    container_name: "comments-service"
+    build:
+      context: ..
+      dockerfile: rust/crates/comments-service/Dockerfile
+    depends_on:
+      - main
+    ports:
+      - "3000:3000"
+    networks:
+      app:
+
+networks:
+  app:
