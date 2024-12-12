@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n    c.id as \"id: CommentId\",\n    NULL as \"response_to: CommentId\",\n    c.text,\n    concat_ws(' ', u.first_name, u.last_name) AS \"username!\",\n    EXISTS (SELECT 1 FROM comments AS c1 WHERE c.id = c1.response_to) AS \"has_responses!\"\nFROM comments AS c\nJOIN books AS b ON c.book_id = b.id\nJOIN users AS u ON c.user_id = u.id\nWHERE b.id = $1 AND c.response_to = NULL\nORDER BY c.id",
+  "query": "SELECT\n    c.id as \"id: CommentId\",\n    NULL as \"response_to: CommentId\",\n    c.text,\n    concat_ws(' ', u.first_name, u.last_name) AS \"username!\",\n    EXISTS (SELECT 1 FROM comments AS c1 WHERE c.id = c1.response_to) AS \"has_responses!\"\nFROM comments AS c\nJOIN books AS b ON c.book_id = b.id\nJOIN users AS u ON c.user_id = u.id\nWHERE b.id = $1 AND c.response_to IS NULL\nORDER BY c.id",
   "describe": {
     "columns": [
       {
@@ -42,5 +42,5 @@
       null
     ]
   },
-  "hash": "753c80c73ab625c565e50dace46c941f10f4bebb17a9119fb278851216a6aa74"
+  "hash": "1d4126487bd657009fa64228d9e74ca21e2916f188c6a9468b49086a953bfb12"
 }
