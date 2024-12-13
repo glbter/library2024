@@ -51,6 +51,8 @@ templ Book(book model.BookWithAuthors, commentServiceUrl string) {
                 <button class="btn btn-sm btn-outline btn-warning" type="reset">Clear</button>
                 <button class="btn btn-sm btn-info" type="submit">Send</button>
             </form>
+        } else {
+            <p>Comments</p>
         }
         <div
             hx-get={ fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID) }
