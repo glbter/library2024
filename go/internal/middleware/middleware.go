@@ -69,7 +69,7 @@ func (m *CSPMiddleware) AddCSPHeader(next http.Handler) http.Handler {
 		// set nonces in context
 		ctx := context.WithValue(r.Context(), NonceKey, nonceSet)
 		// insert the nonces into the content security policy header
-		cspHeader := fmt.Sprintf("default-src 'self'; img-src 'self' data:; script-src 'nonce-%s' 'nonce-%s' 'nonce-%s' 'nonce-%s'; style-src 'nonce-%s' %s; connect-src %s/api/", // TODO: change to your domain
+		cspHeader := fmt.Sprintf("default-src 'self'; img-src 'self' data:; script-src 'nonce-%s' 'nonce-%s' 'nonce-%s' 'nonce-%s'; style-src 'nonce-%s' %s; connect-src 'self' %s/api/",
 			nonceSet.Htmx,
 			nonceSet.Hyperscript,
 			nonceSet.HtmxConfig,

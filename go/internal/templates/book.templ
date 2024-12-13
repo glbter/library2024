@@ -56,8 +56,7 @@ templ Book(book model.BookWithAuthors, commentServiceUrl string) {
             hx-get={ fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID) }
             hx-trigger="load"
             hx-swap="outerHTML"
-            _="on click
-                toggle @disabled until htmx:afterOnLoad"
+            _="on click toggle @disabled until htmx:afterOnLoad"
         ></div>
 	</div>
 }

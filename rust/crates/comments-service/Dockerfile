@@ -31,4 +31,4 @@ COPY crates/comments-service/migrations migrations
 
 EXPOSE 4000
 
-ENTRYPOINT [ "./comments-service --port=4000" ]
+ENTRYPOINT [ "./comments-service", "--port=4000" ]
