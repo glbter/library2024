@@ -2,7 +2,6 @@ mod r#impl;
 
 use axum::async_trait;
 use sqlx::{Database, Pool};
-use std::sync::Arc;
 
 use crate::model::{
     dto::CommentInfo,
@@ -80,5 +79,9 @@ pub trait CommentRepo {
 pub trait SessionRepo {
     type Error: std::error::Error + Send + Sync + 'static;
 
-    async fn select_username(self, session_id: SessionId, user_id: UserId) -> Result<Option<Arc<str>>, Self::Error>;
+    async fn select_username(
+        self,
+        session_id: SessionId,
+        user_id: UserId,
+    ) -> Result<Option<Box<str>>, Self::Error>;
 }

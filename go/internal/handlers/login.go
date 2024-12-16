@@ -19,6 +19,8 @@ import (
 
 type GetLoginHandler struct{}
 
+var _ http.Handler = &GetLoginHandler{}
+
 func NewGetLoginHandler() *GetLoginHandler {
 	return &GetLoginHandler{}
 }
@@ -54,6 +56,8 @@ type PostLoginHandler struct {
 	passwordHasher    hash.PasswordHasher
 	sessionCookieName string
 }
+
+var _ http.Handler = &PostLoginHandler{}
 
 type PostLoginHandlerParams struct {
 	UserStore         repo.IUserRepo
@@ -113,6 +117,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Expires:  expiration,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   true,
 		SameSite: http.SameSiteStrictMode,
 	}
 	http.SetCookie(w, &cookie)

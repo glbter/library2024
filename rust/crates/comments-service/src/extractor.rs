@@ -1,4 +1,7 @@
-use std::sync::Arc;
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts, RequestPartsExt};
+use axum_extra::extract::CookieJar;
+use color_eyre::eyre::WrapErr;
+use tracing::instrument;
 
 use crate::{
     model::newtype::UserId,
@@ -6,15 +9,11 @@ use crate::{
     util::{encoder, encoder::SessionCookie},
     AppState, ResponseError,
 };
-use axum::{async_trait, extract::FromRequestParts, http::request::Parts, RequestPartsExt};
-use axum_extra::extract::CookieJar;
-use color_eyre::eyre::WrapErr;
-use tracing::instrument;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug)]
 pub struct User {
     id: UserId,
-    name: Arc<str>,
+    name: Box<str>,
 }
 
 impl User {
@@ -46,7 +45,7 @@ where
 
         tracing::debug!("Obtained session cookie");
 
-        let SessionCookie {
+        let session_cookie @ SessionCookie {
             session_id,
             user_id,
         } = encoder::decode_session_cookie(session_cookie).map_err(|err| {
@@ -66,7 +65,10 @@ where
         tracing::debug!("Username: {username:?}");
 
         if let Some(username) = username {
-            Ok(User { id: user_id, name: username })
+            Ok(User {
+                id: user_id,
+                name: username,
+            })
         } else {
             Err(ResponseError::Unauthorized {
                 reason: "invalid session token".into(),

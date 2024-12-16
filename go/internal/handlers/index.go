@@ -17,6 +17,8 @@ type IndexHandler struct {
 	bookRepo repo.IBookRepo
 }
 
+var _ http.Handler = &IndexHandler{}
+
 type NewIndexHandlerParams struct {
 	BookRepo repo.IBookRepo
 }

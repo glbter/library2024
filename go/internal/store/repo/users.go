@@ -13,14 +13,8 @@ type UserRepo struct {
 
 var _ IUserRepo = &UserRepo{}
 
-type NewUserRepoParams struct {
-	PasswordHasher hash.PasswordHasher
-}
-
-func NewUserRepo(params NewUserRepoParams) *UserRepo {
-	return &UserRepo{
-		passwordHasher: params.PasswordHasher,
-	}
+func NewUserRepo(passwordHasher hash.PasswordHasher) *UserRepo {
+	return &UserRepo{passwordHasher}
 }
 
 func (r *UserRepo) CreateUser(ctx context.Context, email string, password string) error {

@@ -22,6 +22,8 @@ type GetBookHandler struct {
 	commentServiceURL string
 }
 
+var _ http.Handler = &GetBookHandler{}
+
 type NewGetBookHandlerParams struct {
 	BookRepo          repo.IBookRepo
 	CommentServiceURL string

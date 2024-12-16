@@ -20,6 +20,8 @@ type GetAuthorHandler struct {
 	authorRepo repo.IAuthorRepo
 }
 
+var _ http.Handler = &GetAuthorHandler{}
+
 type NewGetAuthorHandlerParams struct {
 	AuthorRepo repo.IAuthorRepo
 }

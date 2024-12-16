@@ -6,6 +6,7 @@ use crate::model::newtype::{SessionId, UserId};
 
 static BASE64_ENGINE: GeneralPurpose = base64::engine::general_purpose::STANDARD;
 
+#[derive(Debug)]
 pub struct SessionCookie {
     pub session_id: SessionId,
     pub user_id: UserId,

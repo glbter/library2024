@@ -13,6 +13,8 @@ type LogoutHandler struct {
 	sessionCookieName string
 }
 
+var _ http.Handler = &LogoutHandler{}
+
 type LogoutHandlerParams struct {
 	SessionCookieName string
 }

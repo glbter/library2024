@@ -45,9 +45,7 @@ func main() {
 	database.MustOpen(cfg.DSN)
 	pwHasher := passwordHasher.NewHPasswordHasher()
 
-	userRepo := repo.NewUserRepo(repo.NewUserRepoParams{
-		PasswordHasher: pwHasher,
-	})
+	userRepo := repo.NewUserRepo(pwHasher)
 
 	sessionRepo := repo.NewSessionRepo()
 

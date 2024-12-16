@@ -13,11 +13,13 @@ import (
 
 type AboutHandLer struct{}
 
-func NewAboutHandler() *AboutHandLer {
-	return &AboutHandLer{}
+var _ http.Handler = AboutHandLer{}
+
+func NewAboutHandler() AboutHandLer {
+	return AboutHandLer{}
 }
 
-func (h *AboutHandLer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h AboutHandLer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := templates.About()
 	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
 

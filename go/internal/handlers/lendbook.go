@@ -12,6 +12,8 @@ type LendBookHandler struct {
 	bookRepo repo.IBookRepo
 }
 
+var _ http.Handler = &LendBookHandler{}
+
 type NewLendBookHandlerParams struct {
 	BookRepo repo.IBookRepo
 }

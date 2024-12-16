@@ -10,11 +10,13 @@ import (
 
 type NotFoundHandler struct{}
 
-func NewNotFoundHandler() *NotFoundHandler {
-	return &NotFoundHandler{}
+var _ http.Handler = NotFoundHandler{}
+
+func NewNotFoundHandler() NotFoundHandler {
+	return NotFoundHandler{}
 }
 
-func (h *NotFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h NotFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if acceptHeaders := r.Header.Values("Accept"); len(acceptHeaders) <= 0 || !strings.Contains(acceptHeaders[0], "text/html") {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return

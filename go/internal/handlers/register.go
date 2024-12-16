@@ -14,6 +14,8 @@ import (
 
 type GetRegisterHandler struct{}
 
+var _ http.Handler = GetRegisterHandler{}
+
 func NewGetRegisterHandler() GetRegisterHandler {
 	return GetRegisterHandler{}
 }
@@ -50,6 +52,8 @@ func (h GetRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type PostRegisterHandler struct {
 	userStore repo.IUserRepo
 }
+
+var _ http.Handler = &PostRegisterHandler{}
 
 type PostRegisterHandlerParams struct {
 	UserRepo repo.IUserRepo
