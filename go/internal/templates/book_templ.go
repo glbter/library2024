@@ -134,7 +134,7 @@ func Book(book model.BookWithAuthors, commentServiceUrl string) templ.Component 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"beforeend\" hx-trigger=\"#comments\"><label class=\"form-control w-full\"><span class=\"label\"><span class=\"label-text\">Comment</span></span> <textarea class=\"textarea textarea-bordered\" name=\"text\" placeholder=\"Text of your comment\"></textarea></label> <button class=\"btn btn-sm btn-outline btn-warning\" type=\"reset\">Clear</button> <button class=\"btn btn-sm btn-info\" type=\"submit\">Send</button></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"beforeend\" hx-trigger=\"submit\" hx-target=\"#comments\"><label class=\"form-control w-full\"><span class=\"label\"><span class=\"label-text\">Comment</span></span> <textarea class=\"textarea textarea-bordered\" name=\"text\" placeholder=\"Text of your comment\"></textarea></label> <button class=\"btn btn-sm btn-outline btn-warning\" type=\"reset\">Clear</button> <button class=\"btn btn-sm btn-info\" type=\"submit\">Send</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -151,7 +151,7 @@ func Book(book model.BookWithAuthors, commentServiceUrl string) templ.Component 
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 58, Col: 93}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/book.templ`, Line: 59, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {

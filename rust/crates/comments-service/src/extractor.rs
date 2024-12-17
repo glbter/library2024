@@ -35,6 +35,8 @@ where
 
     #[instrument(skip_all)]
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        tracing::debug!("Extracting user from request parts");
+        
         let cookies = parts.extract::<CookieJar>().await?;
         let session_cookie =
             cookies

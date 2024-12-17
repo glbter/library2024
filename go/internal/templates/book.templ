@@ -40,7 +40,8 @@ templ Book(book model.BookWithAuthors, commentServiceUrl string) {
                 method="post"
                 hx-post={ fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID) }
                 hx-swap="beforeend"
-                hx-trigger="#comments"
+                hx-trigger="submit"
+                hx-target="#comments"
             >
                 <label class="form-control w-full">
                     <span class="label">
