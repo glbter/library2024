@@ -43,7 +43,7 @@ func main() {
 	cfg := config.MustLoadConfig()
 
 	database.MustOpen(cfg.DSN)
-	pwHasher := passwordHasher.NewHPasswordHasher()
+	pwHasher := passwordHasher.NewPasswordHasher()
 
 	userRepo := repo.NewUserRepo(pwHasher)
 

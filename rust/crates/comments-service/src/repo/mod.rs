@@ -3,6 +3,7 @@ mod r#impl;
 use axum::async_trait;
 use sqlx::{Database, Pool};
 
+use crate::model::newtype::Username;
 use crate::model::{
     dto::CommentInfo,
     newtype::{BookId, CommentId, SessionId, UserId},
@@ -83,5 +84,5 @@ pub trait SessionRepo {
         self,
         session_id: SessionId,
         user_id: UserId,
-    ) -> Result<Option<Box<str>>, Self::Error>;
+    ) -> Result<Option<Username>, Self::Error>;
 }

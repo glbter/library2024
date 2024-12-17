@@ -4,7 +4,7 @@ use color_eyre::eyre::WrapErr;
 use tracing::instrument;
 
 use crate::{
-    model::newtype::UserId,
+    model::newtype::{Uname, UserId, Username},
     repo::{SessionRepo, SessionRepoImpl},
     util::{encoder, encoder::SessionCookie},
     AppState, ResponseError,
@@ -13,7 +13,7 @@ use crate::{
 #[derive(Debug)]
 pub struct User {
     id: UserId,
-    name: Box<str>,
+    name: Username,
 }
 
 impl User {
@@ -21,7 +21,7 @@ impl User {
         self.id
     }
 
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &Uname {
         &self.name
     }
 }

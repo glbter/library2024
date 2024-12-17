@@ -7,14 +7,17 @@ use std::{
 use askama_axum::Template;
 use itertools::Itertools;
 
-use crate::model::{dto::CommentInfo, newtype::CommentId};
+use crate::model::{
+    dto::CommentInfo,
+    newtype::{CommentId, Uname},
+};
 
 #[derive(Debug, Template)]
 #[cfg_attr(test, derive(PartialEq))]
 #[template(path = "comment.html")]
 pub struct BookComment<'a> {
     id: &'a CommentId,
-    username: &'a str,
+    username: &'a Uname,
     text: &'a str,
     responses: Responses<'a>,
 }
@@ -22,7 +25,7 @@ pub struct BookComment<'a> {
 impl<'a> BookComment<'a> {
     pub const fn new(
         id: &'a CommentId,
-        username: &'a str,
+        username: &'a Uname,
         text: &'a str,
         responses: Responses<'a>,
     ) -> Self {
@@ -34,7 +37,7 @@ impl<'a> BookComment<'a> {
         }
     }
 
-    pub const fn fresh(id: &'a CommentId, username: &'a str, text: &'a str) -> Self {
+    pub const fn fresh(id: &'a CommentId, username: &'a Uname, text: &'a str) -> Self {
         Self::new(
             id,
             username,
@@ -201,6 +204,7 @@ mod tests {
     use uuid::Uuid;
 
     use super::*;
+    use crate::model::newtype::Username;
 
     static COMMENTS: LazyLock<(Vec<CommentId>, Vec<CommentInfo>)> = LazyLock::new(|| {
         let ids = Vec::from_iter(iter::from_fn(|| Some(CommentId::new(Uuid::now_v7()))).take(6));
@@ -209,42 +213,42 @@ mod tests {
                 CommentInfo {
                     id: ids[0],
                     response_to: None,
-                    username: "0".to_string(),
+                    username: Username::new("0"),
                     text: "".to_string(),
                     has_responses: false,
                 },
                 CommentInfo {
                     id: ids[1],
                     response_to: None,
-                    username: "1".to_string(),
+                    username: Username::new("1"),
                     text: "".to_string(),
                     has_responses: true,
                 },
                 CommentInfo {
                     id: ids[2],
                     response_to: Some(ids[1]),
-                    username: "2".to_string(),
+                    username: Username::new("2"),
                     text: "".to_string(),
                     has_responses: true,
                 },
                 CommentInfo {
                     id: ids[3],
                     response_to: Some(ids[2]),
-                    username: "3".to_string(),
+                    username: Username::new("3"),
                     text: "".to_string(),
                     has_responses: false,
                 },
                 CommentInfo {
                     id: ids[4],
                     response_to: None,
-                    username: "4".to_string(),
+                    username: Username::new("4"),
                     text: "".to_string(),
                     has_responses: false,
                 },
                 CommentInfo {
                     id: ids[5],
                     response_to: Some(ids[1]),
-                    username: "5".to_string(),
+                    username: Username::new("5"),
                     text: "".to_string(),
                     has_responses: false,
                 },
@@ -270,7 +274,7 @@ mod tests {
                             &ids[0],
                             BookComment {
                                 id: &ids[0],
-                                username: "0",
+                                username: "0".into(),
                                 text: "",
                                 responses: BookComments::default().into(),
                             },
@@ -279,7 +283,7 @@ mod tests {
                             &ids[1],
                             BookComment {
                                 id: &ids[1],
-                                username: "1",
+                                username: "1".into(),
                                 text: "",
                                 responses: BookComments {
                                     response_to: Some(&ids[1]),
@@ -288,7 +292,7 @@ mod tests {
                                             &ids[2],
                                             BookComment {
                                                 id: &ids[2],
-                                                username: "2",
+                                                username: "2".into(),
                                                 text: "",
                                                 responses: BookComments {
                                                     response_to: Some(&ids[2]),
@@ -296,7 +300,7 @@ mod tests {
                                                         &ids[3],
                                                         BookComment {
                                                             id: &ids[3],
-                                                            username: "3",
+                                                            username: "3".into(),
                                                             text: "",
                                                             responses: BookComments {
                                                                 response_to: Some(&ids[3]),
@@ -313,7 +317,7 @@ mod tests {
                                             &ids[5],
                                             BookComment {
                                                 id: &ids[5],
-                                                username: "5",
+                                                username: "5".into(),
                                                 text: "",
                                                 responses: BookComments {
                                                     response_to: Some(&ids[5]),
@@ -331,7 +335,7 @@ mod tests {
                             &ids[4],
                             BookComment {
                                 id: &ids[4],
-                                username: "4",
+                                username: "4".into(),
                                 text: "",
                                 responses: BookComments {
                                     response_to: Some(&ids[4]),
@@ -367,7 +371,7 @@ mod tests {
                             &ids[0],
                             BookComment {
                                 id: &ids[0],
-                                username: "0",
+                                username: "0".into(),
                                 text: "",
                                 responses: BookComments::default().into(),
                             },
@@ -376,7 +380,7 @@ mod tests {
                             &ids[1],
                             BookComment {
                                 id: &ids[1],
-                                username: "1",
+                                username: "1".into(),
                                 text: "",
                                 responses: BookComments {
                                     response_to: Some(&ids[1]),
@@ -385,7 +389,7 @@ mod tests {
                                             &ids[2],
                                             BookComment {
                                                 id: &ids[2],
-                                                username: "2",
+                                                username: "2".into(),
                                                 text: "",
                                                 responses: Responses::NotLoaded,
                                             },
@@ -394,7 +398,7 @@ mod tests {
                                             &ids[5],
                                             BookComment {
                                                 id: &ids[5],
-                                                username: "5",
+                                                username: "5".into(),
                                                 text: "",
                                                 responses: BookComments {
                                                     response_to: Some(&ids[5]),
@@ -412,7 +416,7 @@ mod tests {
                             &ids[4],
                             BookComment {
                                 id: &ids[4],
-                                username: "4",
+                                username: "4".into(),
                                 text: "",
                                 responses: BookComments {
                                     response_to: Some(&ids[4]),

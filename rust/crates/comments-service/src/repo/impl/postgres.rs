@@ -6,7 +6,7 @@ use uuid::Uuid;
 use crate::{
     model::{
         dto::CommentInfo,
-        newtype::{BookId, CommentId, SessionId, UserId},
+        newtype::{BookId, CommentId, SessionId, UserId, Username},
     },
     repo::{CommentRepo, CommentRepoImpl, SessionRepo, SessionRepoImpl},
 };
@@ -180,7 +180,7 @@ impl SessionRepo for &SessionRepoImpl<PgPool> {
         self,
         session_id: SessionId,
         user_id: UserId,
-    ) -> Result<Option<Box<str>>, Self::Error> {
+    ) -> Result<Option<Username>, Self::Error> {
         select_session_user_username(self.pool(), session_id, user_id).await
     }
 }
@@ -190,10 +190,10 @@ async fn select_session_user_username<'c>(
     executor: impl PgExecutor<'c>,
     session_id: SessionId,
     user_id: UserId,
-) -> sqlx::Result<Option<Box<str>>> {
+) -> sqlx::Result<Option<Username>> {
     sqlx::query!(
         r#"SELECT
-    concat_ws(' ', u.first_name, u.last_name) AS "username!: Box<str>"
+    concat_ws(' ', u.first_name, u.last_name) AS "username!: Username"
 FROM sessions AS s
 JOIN users AS u ON u.id = s.user_id
 WHERE s.id = $1 AND s.user_id = $2"#,
