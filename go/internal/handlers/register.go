@@ -51,7 +51,7 @@ func (h GetRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type PostRegisterHandler struct {
-	userStore repo.IUserRepo
+	userRepo repo.IUserRepo
 }
 
 var _ http.Handler = &PostRegisterHandler{}
@@ -62,7 +62,7 @@ type PostRegisterHandlerParams struct {
 
 func NewPostRegisterHandler(params PostRegisterHandlerParams) *PostRegisterHandler {
 	return &PostRegisterHandler{
-		userStore: params.UserRepo,
+		userRepo: params.UserRepo,
 	}
 }
 
@@ -72,7 +72,7 @@ func (h *PostRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	email := strings.TrimSpace(r.FormValue("email"))
 	password := strings.TrimSpace(r.FormValue("password"))
 
-	err := h.userStore.CreateUser(r.Context(), firstName, lastName, email, password)
+	err := h.userRepo.CreateUser(r.Context(), firstName, lastName, email, password)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

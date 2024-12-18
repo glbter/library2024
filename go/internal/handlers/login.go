@@ -51,8 +51,8 @@ func (h *GetLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type PostLoginHandler struct {
-	userStore         repo.IUserRepo
-	sessionStore      repo.ISessionRepo
+	userRepo          repo.IUserRepo
+	sessionRepo       repo.ISessionRepo
 	passwordHasher    hash.PasswordHasher
 	sessionCookieName string
 }
@@ -60,7 +60,7 @@ type PostLoginHandler struct {
 var _ http.Handler = &PostLoginHandler{}
 
 type PostLoginHandlerParams struct {
-	UserStore         repo.IUserRepo
+	UserRepo          repo.IUserRepo
 	SessionRepo       repo.ISessionRepo
 	PasswordHasher    hash.PasswordHasher
 	SessionCookieName string
@@ -68,8 +68,8 @@ type PostLoginHandlerParams struct {
 
 func NewPostLoginHandler(params PostLoginHandlerParams) *PostLoginHandler {
 	return &PostLoginHandler{
-		userStore:         params.UserStore,
-		sessionStore:      params.SessionRepo,
+		userRepo:          params.UserRepo,
+		sessionRepo:       params.SessionRepo,
 		passwordHasher:    params.PasswordHasher,
 		sessionCookieName: params.SessionCookieName,
 	}
@@ -80,7 +80,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	user, err := h.userStore.GetUser(r.Context(), email)
+	user, err := h.userRepo.GetUser(r.Context(), email)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		if err = templates.LoginError().Render(r.Context(), w); err != nil {
@@ -98,7 +98,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := h.sessionStore.CreateSession(r.Context(), user.ID)
+	session, err := h.sessionRepo.CreateSession(r.Context(), user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		slog.ErrorContext(r.Context(), "Error creating session", slog.Any("err", err))

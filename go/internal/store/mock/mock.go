@@ -15,8 +15,8 @@ type UserRepoMock struct {
 
 var _ repo.IUserRepo = &UserRepoMock{}
 
-func (m *UserRepoMock) CreateUser(ctx context.Context, email string, password string) error {
-	args := m.Called(ctx, email, password)
+func (m *UserRepoMock) CreateUser(ctx context.Context, firstName, lastName, email, password string) error {
+	args := m.Called(ctx, firstName, lastName, email, password)
 
 	return args.Error(0)
 }

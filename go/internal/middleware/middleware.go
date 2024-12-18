@@ -156,13 +156,13 @@ func AddVaryHeader(next http.Handler) http.Handler {
 }
 
 type AuthMiddleware struct {
-	sessionStore      repo.ISessionRepo
+	sessionRepo       repo.ISessionRepo
 	sessionCookieName string
 }
 
-func NewAuthMiddleware(sessionStore repo.ISessionRepo, sessionCookieName string) *AuthMiddleware {
+func NewAuthMiddleware(sessionRepo repo.ISessionRepo, sessionCookieName string) *AuthMiddleware {
 	return &AuthMiddleware{
-		sessionStore:      sessionStore,
+		sessionRepo:       sessionRepo,
 		sessionCookieName: sessionCookieName,
 	}
 }
@@ -197,7 +197,7 @@ func (m *AuthMiddleware) AddUserToContext(next http.Handler) http.Handler {
 			slog.Int64("userID", userID),
 		)
 
-		user, err := m.sessionStore.GetUserFromSession(r.Context(), sessionID, userID)
+		user, err := m.sessionRepo.GetUserFromSession(r.Context(), sessionID, userID)
 		if err != nil {
 			slog.InfoContext(
 				r.Context(),

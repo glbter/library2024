@@ -83,7 +83,7 @@ func main() {
 		r.Get("/login", handlers.NewGetLoginHandler().ServeHTTP)
 
 		r.Post("/login", handlers.NewPostLoginHandler(handlers.PostLoginHandlerParams{
-			UserStore:         userRepo,
+			UserRepo:          userRepo,
 			SessionRepo:       sessionRepo,
 			PasswordHasher:    pwHasher,
 			SessionCookieName: cfg.SessionCookieName,

@@ -12,10 +12,8 @@ func LongDateString(data time.Time) string {
 		return fmt.Sprintf("the %dth of %s %d", day, data.Month(), data.Year())
 	}
 
-	firstDayDigit := day % 10
-
 	var ending string
-	switch firstDayDigit {
+	switch day % 10 {
 	case 1:
 		ending = "st"
 	case 2:

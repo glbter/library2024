@@ -85,7 +85,7 @@ func TestLogin(t *testing.T) {
 			}
 
 			handler := NewPostLoginHandler(PostLoginHandlerParams{
-				UserStore:         userRepo,
+				UserRepo:          userRepo,
 				SessionRepo:       sessionRepo,
 				PasswordHasher:    passwordHash,
 				SessionCookieName: "session",
