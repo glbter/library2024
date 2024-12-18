@@ -17,7 +17,7 @@
     function getRespCodeTarget(elt, respCodeNumber) {
         if (!elt || !respCodeNumber) return null;
 
-        var respCode = respCodeNumber.toString();
+        const respCode = respCodeNumber.toString();
 
         // '*' is the original syntax, as the obvious character for a wildcard.
         // The 'x' alternative was added for maximum compatibility with HTML
@@ -26,7 +26,7 @@
         //
         // Start with the most specific possible attribute and generalize from
         // there.
-        var attrPossibilities = [
+        const attrPossibilities = [
             respCode,
 
             respCode.substr(0, 2) + '*',
@@ -46,9 +46,9 @@
             attrPossibilities.push('error');
         }
 
-        for (var i = 0; i < attrPossibilities.length; i++) {
-            var attr = attrPrefix + attrPossibilities[i];
-            var attrValue = api.getClosestAttributeValue(elt, attr);
+        for (const item of attrPossibilities) {
+            const attr = attrPrefix + item;
+            const attrValue = api.getClosestAttributeValue(elt, attr);
             if (attrValue) {
                 if (attrValue === "this") {
                     return api.findThisElement(elt, attr);
@@ -116,7 +116,7 @@
                 if (!evt.detail.requestConfig) {
                     return true;
                 }
-                var target = getRespCodeTarget(evt.detail.requestConfig.elt, evt.detail.xhr.status);
+                const target = getRespCodeTarget(evt.detail.requestConfig.elt, evt.detail.xhr.status);
                 if (target) {
                     handleErrorFlag(evt);
                     evt.detail.shouldSwap = true;

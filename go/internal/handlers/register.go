@@ -8,6 +8,7 @@ import (
 	"library/internal/utils/ui"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/a-h/templ"
 )
@@ -66,10 +67,12 @@ func NewPostRegisterHandler(params PostRegisterHandlerParams) *PostRegisterHandl
 }
 
 func (h *PostRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+	firstName := strings.TrimSpace(r.FormValue("first_name"))
+	lastName := strings.TrimSpace(r.FormValue("last_name"))
+	email := strings.TrimSpace(r.FormValue("email"))
+	password := strings.TrimSpace(r.FormValue("password"))
 
-	err := h.userStore.CreateUser(r.Context(), email, password)
+	err := h.userStore.CreateUser(r.Context(), firstName, lastName, email, password)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

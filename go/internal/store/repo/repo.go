@@ -7,7 +7,7 @@ import (
 )
 
 type IUserRepo interface {
-	CreateUser(ctx context.Context, email string, password string) error
+	CreateUser(ctx context.Context, firstName, lastName, email, password string) error
 	GetUser(ctx context.Context, email string) (*model.User, error)
 }
 

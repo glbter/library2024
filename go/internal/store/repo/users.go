@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5/pgtype"
 	"library/internal/hash"
 	"library/internal/store/model"
 	"library/internal/store/query"
@@ -17,7 +18,7 @@ func NewUserRepo(passwordHasher hash.PasswordHasher) *UserRepo {
 	return &UserRepo{passwordHasher}
 }
 
-func (r *UserRepo) CreateUser(ctx context.Context, email string, password string) error {
+func (r *UserRepo) CreateUser(ctx context.Context, firstName, lastName, email, password string) error {
 	hashedPassword, err := r.passwordHasher.GenerateFromPassword(password)
 	if err != nil {
 		return err
@@ -34,7 +35,12 @@ func (r *UserRepo) CreateUser(ctx context.Context, email string, password string
 		}
 
 		return tx.User.WithContext(ctx).Create(&model.User{
-			ID:           maxIdUser.ID + 1,
+			ID:        maxIdUser.ID + 1,
+			FirstName: firstName,
+			LastName: pgtype.Text{
+				String: lastName,
+				Valid:  lastName != "",
+			},
 			Email:        email,
 			PasswordHash: hashedPassword,
 		})
