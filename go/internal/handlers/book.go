@@ -24,16 +24,20 @@ type GetBookHandler struct {
 
 var _ http.Handler = &GetBookHandler{}
 
-type NewGetBookHandlerParams struct {
-	BookRepo          repo.IBookRepo
-	CommentServiceURL string
-}
-
-func NewGetBookHandler(params NewGetBookHandlerParams) *GetBookHandler {
-	return &GetBookHandler{
-		bookRepo:          params.BookRepo,
-		commentServiceURL: params.CommentServiceURL,
+func NewGetBookHandler(bookRepo repo.IBookRepo, commentServiceURL string) *GetBookHandler {
+	var err1 error
+	if bookRepo == nil {
+		err1 = errors.New("bookRepo is required")
 	}
+	var err2 error
+	if commentServiceURL == "" {
+		err2 = errors.New("commentServiceURL is required")
+	}
+	err := errors.Join(err1, err2)
+	if err != nil {
+		panic(err)
+	}
+	return &GetBookHandler{bookRepo, commentServiceURL}
 }
 
 func (h *GetBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

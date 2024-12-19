@@ -22,14 +22,11 @@ type GetAuthorHandler struct {
 
 var _ http.Handler = &GetAuthorHandler{}
 
-type NewGetAuthorHandlerParams struct {
-	AuthorRepo repo.IAuthorRepo
-}
-
-func NewGetAuthorHandler(params NewGetAuthorHandlerParams) *GetAuthorHandler {
-	return &GetAuthorHandler{
-		authorRepo: params.AuthorRepo,
+func NewGetAuthorHandler(authorRepo repo.IAuthorRepo) *GetAuthorHandler {
+	if authorRepo == nil {
+		panic(errors.New("authorRepo is required"))
 	}
+	return &GetAuthorHandler{authorRepo}
 }
 
 func (h *GetAuthorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

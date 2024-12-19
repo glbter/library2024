@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"library/internal/templates"
-	"library/internal/utils/errors"
+	errorUtils "library/internal/utils/errors"
 	"library/internal/utils/htmx/requestHeaders"
 	"log/slog"
 	"net/http"
@@ -15,14 +16,11 @@ type LogoutHandler struct {
 
 var _ http.Handler = &LogoutHandler{}
 
-type LogoutHandlerParams struct {
-	SessionCookieName string
-}
-
-func NewLogoutHandler(params LogoutHandlerParams) *LogoutHandler {
-	return &LogoutHandler{
-		sessionCookieName: params.SessionCookieName,
+func NewLogoutHandler(sessionCookieName string) *LogoutHandler {
+	if sessionCookieName == "" {
+		panic(errors.New("sessionCookieName is required"))
 	}
+	return &LogoutHandler{sessionCookieName}
 }
 
 func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +42,6 @@ func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	slog.DebugContext(r.Context(), "CurrentHref: "+currentHref)
 
 	if err := templates.SignIn(currentHref).Render(r.Context(), w); err != nil {
-		errors.ServerError(r.Context(), w, err, "Error rendering template")
+		errorUtils.ServerError(r.Context(), w, err, "Error rendering template")
 	}
 }

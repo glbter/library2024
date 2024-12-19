@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"library/internal/store/repo"
 	"library/internal/templates"
-	"library/internal/utils/errors"
+	errorUtils "library/internal/utils/errors"
 	"library/internal/utils/htmx/requestHeaders"
 	"library/internal/utils/ui"
 	"net/http"
@@ -19,14 +20,11 @@ type IndexHandler struct {
 
 var _ http.Handler = &IndexHandler{}
 
-type NewIndexHandlerParams struct {
-	BookRepo repo.IBookRepo
-}
-
-func NewIndexHandler(params NewIndexHandlerParams) *IndexHandler {
-	return &IndexHandler{
-		bookRepo: params.BookRepo,
+func NewIndexHandler(bookRepo repo.IBookRepo) *IndexHandler {
+	if bookRepo == nil {
+		panic(errors.New("bookRepo is required"))
 	}
+	return &IndexHandler{bookRepo}
 }
 
 const (
@@ -60,7 +58,7 @@ func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	books, totalPages, err := h.bookRepo.GetBooksWithAuthors(r.Context(), page, limit)
 	if err != nil {
-		errors.ServerError(r.Context(), w, err, "Error getting book list")
+		errorUtils.ServerError(r.Context(), w, err, "Error getting book list")
 		return
 	}
 
@@ -68,7 +66,7 @@ func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if hxBoostedHeader != "true" {
 		contents := templates.Index(books, page, totalPages)
 		if err = templates.Layout(contents, ui.TitleHome, "/").Render(r.Context(), w); err != nil {
-			errors.ServerError(r.Context(), w, err, "Error rendering template")
+			errorUtils.ServerError(r.Context(), w, err, "Error rendering template")
 		}
 		return
 	}
@@ -86,6 +84,6 @@ func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = templates.ContentsWithTitle(contents, ui.TitleHome, oobSwaps).Render(r.Context(), w)
 	if err != nil {
-		errors.ServerError(r.Context(), w, err, "Error rendering template")
+		errorUtils.ServerError(r.Context(), w, err, "Error rendering template")
 	}
 }

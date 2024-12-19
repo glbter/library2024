@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"library/internal/store/repo"
 	"library/internal/templates"
-	"library/internal/utils/errors"
+	errorUtils "library/internal/utils/errors"
 	"library/internal/utils/htmx/requestHeaders"
 	"library/internal/utils/ui"
 	"net/http"
@@ -29,7 +30,7 @@ func (h GetRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if hxBoostedHeader != "true" {
 		err = templates.Layout(c, ui.TitleRegister, "/register").Render(r.Context(), w)
 		if err != nil {
-			errors.ServerError(r.Context(), w, err, "Error rendering template")
+			errorUtils.ServerError(r.Context(), w, err, "Error rendering template")
 		}
 		return
 	}
@@ -46,7 +47,7 @@ func (h GetRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err = templates.ContentsWithTitle(c, ui.TitleRegister, oobSwaps).Render(r.Context(), w)
 
 	if err != nil {
-		errors.ServerError(r.Context(), w, err, "Error rendering template")
+		errorUtils.ServerError(r.Context(), w, err, "Error rendering template")
 	}
 }
 
@@ -56,14 +57,11 @@ type PostRegisterHandler struct {
 
 var _ http.Handler = &PostRegisterHandler{}
 
-type PostRegisterHandlerParams struct {
-	UserRepo repo.IUserRepo
-}
-
-func NewPostRegisterHandler(params PostRegisterHandlerParams) *PostRegisterHandler {
-	return &PostRegisterHandler{
-		userRepo: params.UserRepo,
+func NewPostRegisterHandler(userRepo repo.IUserRepo) *PostRegisterHandler {
+	if userRepo == nil {
+		panic(errors.New("userRepo is required"))
 	}
+	return &PostRegisterHandler{userRepo}
 }
 
 func (h *PostRegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

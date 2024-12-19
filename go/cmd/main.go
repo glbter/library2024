@@ -68,17 +68,13 @@ func main() {
 
 		r.NotFound(handlers.NewNotFoundHandler().ServeHTTP)
 
-		r.Get("/", handlers.NewIndexHandler(handlers.NewIndexHandlerParams{
-			BookRepo: bookRepo,
-		}).ServeHTTP)
+		r.Get("/", handlers.NewIndexHandler(bookRepo).ServeHTTP)
 
 		r.Get("/about", handlers.NewAboutHandler().ServeHTTP)
 
 		r.Get("/register", handlers.NewGetRegisterHandler().ServeHTTP)
 
-		r.Post("/register", handlers.NewPostRegisterHandler(handlers.PostRegisterHandlerParams{
-			UserRepo: userRepo,
-		}).ServeHTTP)
+		r.Post("/register", handlers.NewPostRegisterHandler(userRepo).ServeHTTP)
 
 		r.Get("/login", handlers.NewGetLoginHandler().ServeHTTP)
 
@@ -89,21 +85,14 @@ func main() {
 			SessionCookieName: cfg.SessionCookieName,
 		}).ServeHTTP)
 
-		r.Post("/logout", handlers.NewLogoutHandler(handlers.LogoutHandlerParams{
-			SessionCookieName: cfg.SessionCookieName,
-		}).ServeHTTP)
+		r.Post("/logout", handlers.NewLogoutHandler(cfg.SessionCookieName).ServeHTTP)
 
 		r.Route("/books", func(r chi.Router) {
-			r.Get("/{book_id}", handlers.NewGetBookHandler(handlers.NewGetBookHandlerParams{
-				BookRepo:          bookRepo,
-				CommentServiceURL: cfg.CommentServiceURL,
-			}).ServeHTTP)
+			r.Get("/{book_id}", handlers.NewGetBookHandler(bookRepo, cfg.CommentServiceURL).ServeHTTP)
 		})
 
 		r.Route("/authors", func(r chi.Router) {
-			r.Get("/{author_id}", handlers.NewGetAuthorHandler(handlers.NewGetAuthorHandlerParams{
-				AuthorRepo: authorRepo,
-			}).ServeHTTP)
+			r.Get("/{author_id}", handlers.NewGetAuthorHandler(authorRepo).ServeHTTP)
 		})
 	})
 
