@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"library/internal/config"
 	"library/internal/handlers"
 	"library/internal/hash/passwordHasher"
@@ -83,6 +84,7 @@ func main() {
 			SessionRepo:       sessionRepo,
 			PasswordHasher:    pwHasher,
 			SessionCookieName: cfg.SessionCookieName,
+			SecureCookie:      cfg.SecureCookie,
 		}).ServeHTTP)
 
 		r.Post("/logout", handlers.NewLogoutHandler(cfg.SessionCookieName).ServeHTTP)
@@ -101,7 +103,7 @@ func main() {
 	signal.Notify(killSig, os.Interrupt, syscall.SIGTERM)
 
 	srv := &http.Server{
-		Addr:    cfg.Port,
+		Addr:    fmt.Sprint(":", cfg.Port),
 		Handler: r,
 	}
 
@@ -116,7 +118,7 @@ func main() {
 		}
 	}()
 
-	logger.Info("Server started", slog.String("port", cfg.Port), slog.String("env", Environment))
+	logger.Info("Server started", slog.Uint64("port", uint64(cfg.Port)), slog.String("env", Environment))
 	<-killSig
 
 	logger.Info("Shutting down server")

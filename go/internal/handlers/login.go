@@ -55,6 +55,7 @@ type PostLoginHandler struct {
 	sessionRepo       repo.ISessionRepo
 	passwordHasher    hash.PasswordHasher
 	sessionCookieName string
+	secureCookie      bool
 }
 
 var _ http.Handler = &PostLoginHandler{}
@@ -64,6 +65,7 @@ type PostLoginHandlerParams struct {
 	SessionRepo       repo.ISessionRepo
 	PasswordHasher    hash.PasswordHasher
 	SessionCookieName string
+	SecureCookie      bool
 }
 
 func NewPostLoginHandler(params PostLoginHandlerParams) *PostLoginHandler {
@@ -72,6 +74,7 @@ func NewPostLoginHandler(params PostLoginHandlerParams) *PostLoginHandler {
 		sessionRepo:       params.SessionRepo,
 		passwordHasher:    params.PasswordHasher,
 		sessionCookieName: params.SessionCookieName,
+		secureCookie:      params.SecureCookie,
 	}
 }
 
@@ -117,7 +120,7 @@ func (h *PostLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Expires:  expiration,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   h.secureCookie,
 		SameSite: http.SameSiteStrictMode,
 	}
 	http.SetCookie(w, &cookie)
