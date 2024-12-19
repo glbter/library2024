@@ -1,0 +1,67 @@
+package templates
+
+import (
+	"fmt"
+	"library/internal/middleware"
+	"library/internal/store/model"
+	"library/internal/utils/dates"
+)
+
+templ Book(book model.BookWithAuthors, commentServiceUrl string) {
+	<div class="flex flex-col w-full items-center gap-6">
+		<div class="flex flex-row items-start justify-center gap-6">
+			<div class="skeleton w-[24rem] h-[36rem]"></div>
+			<article class="max-w-[65ch]">
+				<h1 class="font-extrabold text-4xl mb-3">{ book.Book.Title }</h1>
+				<ul class="inline text-lg">
+					for _, author := range book.Authors {
+						<li
+							class="inline only:before:content-['By_'] first:before:content-['By_'] before:content-[',_'] last:before:content-[',_and_'] before:text-secondary"
+							aria-label="Authors"
+						>
+							<a
+								href={ templ.SafeURL(fmt.Sprintf("/authors/%d", author.ID)) }
+								class="link link-hover link-secondary"
+								hx-target="main"
+							>
+								{ author.DisplayName }
+							</a>
+						</li>
+					}
+				</ul>
+				<p class="mt-3">Published on { dates.LongDateString(book.Book.PublishedOn.Time) }</p>
+				<p class="mt-3">{ book.Book.Description }</p>
+			</article>
+		</div>
+		if middleware.GetUser(ctx) != nil {
+			<form
+				class="w-full max-w-[65ch]"
+				action={ templ.SafeURL(fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID)) }
+				method="post"
+				hx-post={ fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID) }
+				hx-swap="beforeend"
+				hx-trigger="submit"
+				hx-target="#comments"
+				hx-target-401="#comment-error"
+			>
+				<label class="form-control w-full">
+					<span class="label">
+						<span class="label-text">Comment</span>
+					</span>
+					<textarea class="textarea textarea-bordered" name="text" placeholder="Text of your comment"></textarea>
+				</label>
+				<button class="btn btn-sm btn-outline btn-warning" type="reset">Clear</button>
+				<button class="btn btn-sm btn-info" type="submit">Send</button>
+			    <div id="comment-error" class="text-error"></div>
+			</form>
+		} else {
+			<p>Comments</p>
+		}
+		<div
+			hx-get={ fmt.Sprintf("%s/api/books/%d/comments", commentServiceUrl, book.Book.ID) }
+			hx-trigger="load"
+			hx-swap="outerHTML"
+			_="on click toggle @disabled until htmx:afterOnLoad"
+		></div>
+	</div>
+}

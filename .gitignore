@@ -1,7 +1,11 @@
-.idea
-.vscode
-bin
-tmp
+/.idea
+/*/.idea
+/.vscode
+/go/bin
+/tmp
+/go/tmp
+/rust/target
+/rust/crates/comments-service/*.env
 *.db
 tailwindcss
 tailwindcss.exe

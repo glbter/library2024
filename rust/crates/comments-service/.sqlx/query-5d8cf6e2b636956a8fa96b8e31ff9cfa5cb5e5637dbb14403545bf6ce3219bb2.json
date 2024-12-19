@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n    concat_ws(' ', u.first_name, u.last_name) AS \"username!: Username\"\nFROM sessions AS s\nJOIN users AS u ON u.id = s.user_id\nWHERE s.id = $1 AND s.user_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "username!: Username",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5d8cf6e2b636956a8fa96b8e31ff9cfa5cb5e5637dbb14403545bf6ce3219bb2"
+}

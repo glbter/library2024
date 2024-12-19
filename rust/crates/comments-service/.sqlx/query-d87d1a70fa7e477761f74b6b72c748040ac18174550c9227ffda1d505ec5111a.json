@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH b AS (\n    SELECT b.id\n    FROM books AS b\n    JOIN comments AS c ON c.book_id = b.id\n    WHERE c.id = $2)\nINSERT INTO comments (id, book_id, response_to, user_id, text)\nVALUES ($1, (SELECT b.id FROM b LIMIT 1), $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d87d1a70fa7e477761f74b6b72c748040ac18174550c9227ffda1d505ec5111a"
+}

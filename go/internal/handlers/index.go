@@ -1,0 +1,89 @@
+package handlers
+
+import (
+	"errors"
+	"library/internal/store/repo"
+	"library/internal/templates"
+	errorUtils "library/internal/utils/errors"
+	"library/internal/utils/htmx/requestHeaders"
+	"library/internal/utils/ui"
+	"net/http"
+	"net/url"
+	"strconv"
+
+	"github.com/a-h/templ"
+)
+
+type IndexHandler struct {
+	bookRepo repo.IBookRepo
+}
+
+var _ http.Handler = &IndexHandler{}
+
+func NewIndexHandler(bookRepo repo.IBookRepo) *IndexHandler {
+	if bookRepo == nil {
+		panic(errors.New("bookRepo is required"))
+	}
+	return &IndexHandler{bookRepo}
+}
+
+const (
+	PageQueryParam  = "page"
+	LimitQueryParam = "limit"
+	DefaultPage     = uint(0)
+	DefaultLimit    = uint(15)
+)
+
+func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	q := r.URL.Query()
+
+	page := DefaultPage
+	pageParamValues, hasPage := q[PageQueryParam]
+	if hasPage {
+		_page, err := strconv.ParseUint(pageParamValues[0], 10, strconv.IntSize)
+		if err == nil {
+			page = uint(_page)
+		}
+	}
+
+	limit := DefaultLimit
+	limitParamValues, hasLimit := q[LimitQueryParam]
+	if hasLimit {
+		_limit, err := strconv.ParseUint(limitParamValues[0], 10, strconv.IntSize)
+		if err == nil {
+			limit = uint(_limit)
+		}
+	}
+
+	books, totalPages, err := h.bookRepo.GetBooksWithAuthors(r.Context(), page, limit)
+	if err != nil {
+		errorUtils.ServerError(r.Context(), w, err, "Error getting book list")
+		return
+	}
+
+	hxBoostedHeader := r.Header.Get(requestHeaders.HxBoosted)
+	if hxBoostedHeader != "true" {
+		contents := templates.Index(books, page, totalPages)
+		if err = templates.Layout(contents, ui.TitleHome, "/").Render(r.Context(), w); err != nil {
+			errorUtils.ServerError(r.Context(), w, err, "Error rendering template")
+		}
+		return
+	}
+
+	contents := templates.Index(books, page, totalPages)
+
+	originUrl, _ := url.Parse(r.Header.Get(requestHeaders.HxCurrentURL))
+
+	oobSwaps := []templ.Component{
+		templates.DisabledNavbarLink(ui.IdAnchorHome, ui.TextAnchorHome, true),
+	}
+	if anchor, anchorExists := ui.PathToAnchor[originUrl.Path]; anchorExists {
+		oobSwaps = append(oobSwaps, templates.EnabledNavbarLink(anchor.Id, anchor.Text, originUrl.Path, true))
+	}
+
+	err = templates.ContentsWithTitle(contents, ui.TitleHome, oobSwaps).Render(r.Context(), w)
+	if err != nil {
+		errorUtils.ServerError(r.Context(), w, err, "Error rendering template")
+	}
+}

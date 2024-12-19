@@ -1,0 +1,5 @@
+<ol id="{{self.list_id()|safe}}" class="w-full max-w-[65ch]">
+  {% for comment in self.items.values() %}
+  {{ comment|safe }}
+  {% endfor %}
+</ol>

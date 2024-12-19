@@ -1,0 +1,17 @@
+<li id="comment-{{id}}" class="border border-neutral rounded bg-base-300 p-2">
+  <p class="text-base-content text-sm font-semibold">{{ username }}</p>
+  <p class="text-base-content">{{ text }}</p>
+  {% if let Responses::Loaded(responses) = responses %}
+    {% if !responses.items.is_empty() %}
+    {{ responses|safe }}
+    {% endif %}
+  {% else %}
+    <button
+      class="btn btn-link text-base-content text-xs"
+      hx-get="/api/comments/{{id}}/responses"
+      hx-swap="outerHTML"
+    >
+      Load responses
+    </button>
+  {% endif %}
+</li>

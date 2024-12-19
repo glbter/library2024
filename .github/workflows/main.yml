@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macOS-latest"]
         go: ["1.23.x"]
-        dir: ["./"]
+        dir: ["./go/"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v1
@@ -34,7 +34,7 @@ jobs:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macOS-latest"]
         go: ["1.23.x"]
-        dir: ["./"]
+        dir: ["./go/"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v1

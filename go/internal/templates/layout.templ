@@ -1,0 +1,144 @@
+package templates
+
+import (
+	"library/internal/middleware"
+	"library/internal/utils/ui"
+	"os"
+)
+
+templ Layout(contents templ.Component, title, currentHref string) {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="light">
+		@head(title)
+		<body
+			class="flex flex-col min-h-screen"
+			hx-boost="true"
+		>
+			@nav(currentHref)
+			<main class="flex-1 container p-4 mx-auto h-full">
+				@contents
+			</main>
+			@footer()
+		</body>
+	</html>
+}
+
+templ ContentsWithTitle(contents templ.Component, title string, oobSwaps []templ.Component) {
+	<title>{ title }</title>
+	@contents
+	for _, swap := range oobSwaps {
+		@swap
+	}
+}
+
+templ head(title string) {
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>{ title }</title>
+		if os.Getenv("env") == "production" {
+			<link rel="stylesheet" href="/static/css/style.min.css" nonce={ middleware.GetTwNonce(ctx) }/>
+			<script src="/static/script/htmx.min.js" nonce={ middleware.GetHtmxNonce(ctx) }></script>
+		} else {
+			<link rel="stylesheet" href="/static/css/style.css" nonce={ middleware.GetTwNonce(ctx) }/>
+			<script src="/static/script/htmx.js" nonce={ middleware.GetHtmxNonce(ctx) }></script>
+			<script nonce={ middleware.GetHtmxConfigNonce(ctx) }>
+				htmx.logAll();
+			</script>
+		}
+		<script src="https://unpkg.com/hyperscript.org@0.9.13" nonce={ middleware.GetHyperscriptNonce(ctx) }></script>
+		<script src="/static/script/htmx_config.js" nonce={ middleware.GetHtmxConfigNonce(ctx) }></script>
+		<script src="/static/script/response-targets.js" nonce={ middleware.GetResponseTargetsNonce(ctx) }></script>
+	</head>
+}
+
+templ footer() {
+	<footer class="bg-primary p-4 mt-auto"></footer>
+}
+
+templ nav(currentHref string) {
+	<nav class="bg-primary px-4">
+		<div class="navbar container flex justify-between items-center mx-auto">
+			<ul class="navbar-start flex space-x-4">
+				<li>
+					if currentHref == "/" {
+						@DisabledNavbarLink(ui.IdAnchorHome, ui.TextAnchorHome, false)
+					} else {
+						@EnabledNavbarLink(ui.IdAnchorHome, ui.TextAnchorHome, "/", false)
+					}
+				</li>
+				<li>
+					if currentHref == "/about" {
+						@DisabledNavbarLink(ui.IdAnchorAbout, ui.TextAnchorAbout, false)
+					} else {
+						@EnabledNavbarLink(ui.IdAnchorAbout, ui.TextAnchorAbout, "/about", false)
+					}
+				</li>
+			</ul>
+			<h1 class="navbar-center text-3xl text-primary-content">Library</h1>
+			if middleware.GetUser(ctx) == nil {
+				@SignIn(currentHref)
+			} else {
+				@Logout()
+			}
+		</div>
+	</nav>
+}
+
+templ SignIn(currentHref string) {
+	<ul class="navbar-end flex space-x-4">
+		<li>
+			if currentHref == "/register" {
+				@DisabledNavbarLink(ui.IdAnchorRegister, ui.TextAnchorRegister, false)
+			} else {
+				@EnabledNavbarLink(ui.IdAnchorRegister, ui.TextAnchorRegister, "/register", false)
+			}
+		</li>
+		<li>
+			if currentHref == "/login" {
+				@DisabledNavbarLink(ui.IdAnchorLogin, ui.TextAnchorLogin, false)
+			} else {
+				@EnabledNavbarLink(ui.IdAnchorLogin, ui.TextAnchorLogin, "/login", false)
+			}
+		</li>
+	</ul>
+}
+
+templ Logout() {
+	<form
+		class="navbar-end"
+		action="/logout"
+		method="post"
+		hx-swap="outerHTML show:none"
+		hx-push-url="false"
+		hx-target="this"
+	>
+		<button class="text-primary-content link link-hover" type="submit">
+			Logout
+		</button>
+	</form>
+}
+
+templ DisabledNavbarLink(id, text string, swapOOB bool) {
+	<span
+		id={ id }
+		if swapOOB {
+			hx-swap-oob="true"
+		}
+		class="text-primary-content link"
+	>{ text }</span>
+}
+
+templ EnabledNavbarLink(id, text, href string, swapOOB bool) {
+	<a
+		id={ id }
+		name={ text }
+		class="text-primary-content link link-hover"
+		href={ templ.SafeURL(href) }
+		hx-target="main"
+		hx-swap="innerHTML show:none"
+		if swapOOB {
+			hx-swap-oob="true"
+		}
+	>{ text }</a>
+}
